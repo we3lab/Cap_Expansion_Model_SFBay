@@ -3,42 +3,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - ampl-mp=3.1.0=h2beb688_1006
-  - bzip2=1.0.8=h6c40b1e_6
-  - ca-certificates=2024.9.24=hecd8cb5_0
-  - glpk=5.0=h3cb5acd_0
-  - gmp=6.3.0=hf036a51_2
-  - ipopt=3.14.16=h43feef9_10
-  - libblas=3.9.0=25_osx64_openblas
-  - libcxx=19.1.2=hf95d169_0
-  - libedit=3.1.20191231=h0678c8f_2
-  - libffi=3.4.4=hecd8cb5_1
-  - libgfortran=5.0.0=13_2_0_h97931a8_3
-  - libgfortran5=13.2.0=h2873a65_3
-  - libiconv=1.17=hd75f5a5_2
-  - liblapack=3.9.0=25_osx64_openblas
-  - libopenblas=0.3.28=openmp_h8869122_0
-  - libscotch=7.0.4=hfcec5db_5
-  - libzlib=1.2.13=h87427d6_6
-  - llvm-openmp=19.1.2=hf78d878_0
-  - metis=5.1.0=h3023b02_1007
-  - mumps-include=5.7.3=h694c41f_4
-  - mumps-seq=5.7.3=h158e932_4
-  - ncurses=6.4=hcec6c5f_0
-  - openssl=3.3.2=hd23fc13_0
-  - pip=24.2=py311hecd8cb5_0
-  - ply=3.11=py311hecd8cb5_0
-  - pyomo=6.8.0=py311hd89902b_3
-  - python=3.11.10=h4d6d9e5_0
-  - python_abi=3.11=2_cp311
-  - readline=8.2=hca72f7f_0
-  - setuptools=75.1.0=py311hecd8cb5_0
-  - sqlite=3.45.3=h6c40b1e_0
-  - tk=8.6.14=h4d00af3_0
-  - unixodbc=2.3.12=he8a5cf4_0
-  - wheel=0.44.0=py311hecd8cb5_0
-  - xz=5.4.6=h6c40b1e_1
-  - zlib=1.2.13=h87427d6_6
+  - ampl-mp=3.1.0
+  - glpk=5.0
+  - ipopt=3.14.16
+  - libblas=3.9.0
+  - pip=24.2
+  - pyomo=6.8.0
+  - python=3.11.10
   - pip:
       - annotated-types==0.7.0
       - anyio==4.6.2.post1
