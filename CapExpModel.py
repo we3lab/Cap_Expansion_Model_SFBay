@@ -935,14 +935,28 @@ if __name__ == "__main__":
     fp = os.path.join(os.getcwd(),basepath)     
     params = json.load(open(fp))
     
-    if params['seasonal_regulation']:
-        params['figpath'] = 'Figures/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"
-        params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_Seasonal_" 
-    else:
-        params['figpath'] = 'Figures/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"
-        params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_YearRound_" 
+    if params['sensitivity_analysis']:
 
+        mult = params['projection_multiplier']
+        
+        if not os.path.exists('Sensitivity/'):
+            os.makedirs('Sensitivity/')
+
+        if params['seasonal_regulation']:
+            params['figpath'] = 'Sensitivity/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"  + str(mult) + "/" 
+            params['figpath_base'] = 'Sensitivity/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "_" + str(mult) + "_" 
+        else:
+            params['figpath'] = 'Sensitivity/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"  + str(mult) + "/" 
+            params['figpath_base'] = 'Sensitivity/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "_" + str(mult) + "_" 
     
+    else:        
+        if params['seasonal_regulation']:
+            params['figpath'] = 'Figures/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"
+            params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_Seasonal_" 
+        else:
+            params['figpath'] = 'Figures/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"
+            params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_YearRound_" 
+
     
     if not os.path.exists(params['figpath']):
         os.makedirs(params['figpath'])
