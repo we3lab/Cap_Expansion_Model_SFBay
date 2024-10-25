@@ -61,6 +61,7 @@ class capacity_expansion():
                         tee=True)
         
         print('Policy Scenario:', self.Constraint_tag)
+        print('Projected Discharge Multiplier:', self.projection_multiplier)
         print('Solver:', self.solver_type)
         print('Total NPV Cost = ', round(model.total_cost(),2), 'million')
         
@@ -73,7 +74,6 @@ class capacity_expansion():
                 else:
                     print('\t',L+': not built', round(model.capex_NPV[WWTP,L](),2))
         
-        # save results as a csv file for each WWTP with the following columns: model.t, model.x_status, model.x_max, model.r, model.status, model.eps, model.z, model.b, model.u, model.zeta
         #print summary results
         summary = pd.DataFrame(index=model.WWTP)
         summary['Total_cost'] = [model.total_cost_WWTP[WWTP].value for WWTP in model.WWTP]
