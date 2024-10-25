@@ -6,7 +6,7 @@
     "seasonal_regulation": false,
     "include_L3": true,
     "include_L2": true,
-    "include_L2pt5": true,
+    "include_L2pt5": false,
     "include_SS": true,
     "update_figures": false,
     "discount_rate": 0.02,
