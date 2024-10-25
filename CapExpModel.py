@@ -70,7 +70,8 @@ class capacity_expansion():
             for L in model.L:
                 if sum(model.u[WWTP,L,t].value for t in model.t) == 1:
                     #print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Lower bound (' + str(model.LB[WWTP, L].value)+ '); Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
-                    print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
+                    print('\t',L+':', round(model.x_max[WWTP,L](),2), '(' + str(round(max(model.x[WWTP,L,t].value for t in model.t),1)) + ')',
+                          '; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
                 else:
                     print('\t',L+': not built', round(model.capex_NPV[WWTP,L](),2))
         
@@ -185,13 +186,25 @@ class capacity_expansion():
         '''
         
         ## define bounds for each upgrade 
+        
         upgrade_bound_tags = {'SS': self.bounds_SS_tag, 'L2': self.bounds_L2_tag, 'L2pt5': self.bounds_L2pt5_tag, 'L3': self.bounds_L3_tag}
         upgrade_bound_max_tags = {'SS': self.bounds_SS_max_tag, 'L2': self.bounds_L2_max_tag, 'L2pt5': self.bounds_L2pt5_max_tag, 'L3': self.bounds_L3_max_tag}
         
-        
+        # if projected discharge multiplier > 1:
+        # increase upper bound of all upgrades by the same factor
+        mult = 1
+        if self.projection_multiplier > 1:
+            mult = self.projection_multiplier 
+
+
         LB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
-        UB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
+        UB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][1]] * mult for upgrade in self.L for i in self.WWTP}
         
+
+        # The bounds for x_max removal are not multiplied by the projection multiplier
+        # Since, the capex is based on the upper bound of the upgrade provided by BACWA
+        # Therefore, this places an upper bound on how large the upgrade can be (unless a capex costing function is provided)
+        # i.e. For the given capex, this is the largest TIN removal that can be achieved with this upgrade
         LB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
         UB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
 
