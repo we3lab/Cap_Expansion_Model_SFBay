@@ -61,6 +61,7 @@ class capacity_expansion():
                         tee=True)
         
         print('Policy Scenario:', self.Constraint_tag)
+        print('Projected Discharge Multiplier:', self.projection_multiplier)
         print('Solver:', self.solver_type)
         print('Total NPV Cost = ', round(model.total_cost(),2), 'million')
         
@@ -69,11 +70,11 @@ class capacity_expansion():
             for L in model.L:
                 if sum(model.u[WWTP,L,t].value for t in model.t) == 1:
                     #print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Lower bound (' + str(model.LB[WWTP, L].value)+ '); Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
-                    print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
+                    print('\t',L+':', round(model.x_max[WWTP,L](),2), '(' + str(round(max(model.x[WWTP,L,t].value for t in model.t),1)) + ')',
+                          '; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
                 else:
                     print('\t',L+': not built', round(model.capex_NPV[WWTP,L](),2))
         
-        # save results as a csv file for each WWTP with the following columns: model.t, model.x_status, model.x_max, model.r, model.status, model.eps, model.z, model.b, model.u, model.zeta
         #print summary results
         summary = pd.DataFrame(index=model.WWTP)
         summary['Total_cost'] = [model.total_cost_WWTP[WWTP].value for WWTP in model.WWTP]
@@ -87,6 +88,8 @@ class capacity_expansion():
 
         summary.loc['Total'] = summary.sum()
         summary.to_csv(self.figpath_base +'summary.csv')
+
+        self.summary = summary
         
         # print individual WWTP results
         for WWTP in model.WWTP:
@@ -183,13 +186,25 @@ class capacity_expansion():
         '''
         
         ## define bounds for each upgrade 
+        
         upgrade_bound_tags = {'SS': self.bounds_SS_tag, 'L2': self.bounds_L2_tag, 'L2pt5': self.bounds_L2pt5_tag, 'L3': self.bounds_L3_tag}
         upgrade_bound_max_tags = {'SS': self.bounds_SS_max_tag, 'L2': self.bounds_L2_max_tag, 'L2pt5': self.bounds_L2pt5_max_tag, 'L3': self.bounds_L3_max_tag}
         
-        
+        # if projected discharge multiplier > 1:
+        # increase upper bound of all upgrades by the same factor
+        mult = 1
+        if self.projection_multiplier > 1:
+            mult = self.projection_multiplier 
+
+
         LB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
-        UB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
+        UB = {(i, upgrade): df.loc[i, upgrade_bound_tags[upgrade][1]] * mult for upgrade in self.L for i in self.WWTP}
         
+
+        # The bounds for x_max removal are not multiplied by the projection multiplier
+        # Since, the capex is based on the upper bound of the upgrade provided by BACWA
+        # Therefore, this places an upper bound on how large the upgrade can be (unless a capex costing function is provided)
+        # i.e. For the given capex, this is the largest TIN removal that can be achieved with this upgrade
         LB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
         UB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
 
@@ -356,7 +371,7 @@ class capacity_expansion():
         discharge = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
             current = df.loc[i, self.discharge_current_tag] * 2.204623                                       # convert kg/day to lbs/day
-            projected = df.loc[i, self.discharge_projected_tag]
+            projected = df.loc[i, self.discharge_projected_tag] * self.projection_multiplier
             discharge[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         # regulations for each WWTP
@@ -920,14 +935,28 @@ if __name__ == "__main__":
     fp = os.path.join(os.getcwd(),basepath)     
     params = json.load(open(fp))
     
-    if params['seasonal_regulation']:
-        params['figpath'] = 'Figures/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"
-        params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_Seasonal_" 
-    else:
-        params['figpath'] = 'Figures/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"
-        params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_YearRound_" 
+    if params['sensitivity_analysis']:
 
+        mult = params['projection_multiplier']
+        
+        if not os.path.exists('Sensitivity/'):
+            os.makedirs('Sensitivity/')
+
+        if params['seasonal_regulation']:
+            params['figpath'] = 'Sensitivity/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"  + str(mult) + "/" 
+            params['figpath_base'] = 'Sensitivity/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "_" + str(mult) + "_" 
+        else:
+            params['figpath'] = 'Sensitivity/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"  + str(mult) + "/" 
+            params['figpath_base'] = 'Sensitivity/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "_" + str(mult) + "_" 
     
+    else:        
+        if params['seasonal_regulation']:
+            params['figpath'] = 'Figures/' + params['version_num'] + "/Seasonal/" + params['Constraint_tag'] + "/"
+            params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_Seasonal_" 
+        else:
+            params['figpath'] = 'Figures/' + params['version_num'] + "/Year_round/" + params['Constraint_tag'] + "/"
+            params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params['Constraint_tag'] + "_YearRound_" 
+
     
     if not os.path.exists(params['figpath']):
         os.makedirs(params['figpath'])
