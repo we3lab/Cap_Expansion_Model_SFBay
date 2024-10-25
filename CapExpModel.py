@@ -87,6 +87,8 @@ class capacity_expansion():
 
         summary.loc['Total'] = summary.sum()
         summary.to_csv(self.figpath_base +'summary.csv')
+
+        self.summary = summary
         
         # print individual WWTP results
         for WWTP in model.WWTP:
@@ -356,7 +358,7 @@ class capacity_expansion():
         discharge = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
             current = df.loc[i, self.discharge_current_tag] * 2.204623                                       # convert kg/day to lbs/day
-            projected = df.loc[i, self.discharge_projected_tag]
+            projected = df.loc[i, self.discharge_projected_tag] * self.projection_multiplier
             discharge[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         # regulations for each WWTP
