@@ -750,6 +750,26 @@ class capacity_expansion():
         
     
     # Plotting functions
+
+
+    # Plot flows for each WWTP
+    def plot_flows(self, model):
+        
+        colors = ['green', 'red', 'purple', 'black', 'yellow', 'pink', 'brown', 'grey']
+        hfont = {'fontname':'Helvetica', 'size':12}
+
+        # plot regulations as dashed lines
+        for i, WWTP in enumerate(model.WWTP):
+            fig, ax = plt.subplots()
+            plt.plot(self.datetime, [value(model.flow[WWTP, t]) for t in model.t], '-', color=colors[i], label = 'Projected flows')
+            plt.xlabel('Year', **hfont)
+            plt.ylabel('Discharge Flow (mgd)', **hfont)
+            #fig.savefig(self.figpath + self.solver_type + '_'+ self.version_num + '_' + "flows" + str(WWTP)+ ".png")
+
+        return fig, ax
+    
+    
+    # Plot regulations and required removal for each WWTP
     def plot_regulations(self, model):
         
         colors = ['green', 'red', 'purple', 'black', 'yellow', 'pink', 'brown', 'grey']
@@ -890,9 +910,6 @@ class capacity_expansion():
                     axs[i].plot(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Max TIN Removal Capacity (lb N/day)', **hfont)
-                if plot_tag == 'conc':
-                    TN_conc = [(model.dis[WWTP,t]() - model.x[WWTP,L,t]()*model.status[WWTP,L,t]())/model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL for t in model.t]
-                    axs[i].plot(self.datetime, TN_conc, '-', color = colors[L],label = L)
 
                 
             
@@ -987,6 +1004,7 @@ if __name__ == "__main__":
     model = m.main()
 
     fig, ax = m.plot_subfigures(model, 'conc')
+    #fig, ax = m.plot_flows(model)
 
     if params["update_figures"]:
         # Plot binary variables
