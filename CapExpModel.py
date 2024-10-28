@@ -398,6 +398,17 @@ class capacity_expansion():
         model.dis = Param(model.WWTP, model.t, initialize=dis_dict, mutable=True)
         model.dis_minus_reg = Param(model.WWTP, model.t, initialize=dis_minus_reg_dict, mutable=True)
 
+        # Flow for each WWTP
+        flow = pd.DataFrame(index=self.datetime, columns=df.index)
+        for i in model.WWTP:
+            current = df.loc[i, self.flow_current_tag]                                        # convert kg/day to lbs/day
+            projected = df.loc[i, self.flow_projected_tag] * self.projection_multiplier
+            flow[i] = np.linspace(current, projected, 
+                                            len(self.datetime), endpoint=True) 
+        
+        flow_dict = {(WWTP,t): flow[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
+        model.flow = Param(model.WWTP, model.t, initialize=flow_dict, mutable=True)
+
         return model
 
 
@@ -879,6 +890,10 @@ class capacity_expansion():
                     axs[i].plot(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Max TIN Removal Capacity (lb N/day)', **hfont)
+                if plot_tag == 'conc':
+                    TN_conc = [(model.dis[WWTP,t]() - model.x[WWTP,L,t]()*model.status[WWTP,L,t]())/model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL for t in model.t]
+                    axs[i].plot(self.datetime, TN_conc, '-', color = colors[L],label = L)
+
                 
             
             if plot_tag == 'opex':
@@ -899,7 +914,6 @@ class capacity_expansion():
         
         fig.tight_layout()    
         fig.savefig(self.figpath + '_'+ self.version_num + '_' + self.Constraint_tag + '_' + str(plot_tag)+".png")
-        plt.close()
         return fig, axs
     
     
@@ -971,6 +985,8 @@ if __name__ == "__main__":
 
 
     model = m.main()
+
+    fig, ax = m.plot_subfigures(model, 'conc')
 
     if params["update_figures"]:
         # Plot binary variables
