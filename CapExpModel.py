@@ -941,7 +941,7 @@ class capacity_expansion():
                         SS_lim[t] = (model.dis[WWTP, t]() * model.SS_rem_per[WWTP]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                     axs[i].plot(self.datetime, conc, '-', color = colors[L],label = L)
                     if i == ciel:
-                        axs[i].set_ylabel('TN Conc (mg N/L)', **hfont)
+                        axs[i].set_ylabel('Effluent TN Conc after upgrade (mg N/L)', **hfont)
                 
                 if plot_tag == 'removal':
                     #create an array of zeros size model.t
@@ -969,10 +969,10 @@ class capacity_expansion():
                 axs[i].plot(self.datetime_years, cum_capex, '-', color = 'blue',label = 'Cumulative capex')
             
             if plot_tag == 'conc':
-                axs[i].plot(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 max removal')
-                axs[i].plot(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 max removal')
+                axs[i].plot(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 min conc')
+                axs[i].plot(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 min conc')
                 if model.SS_rem_per[WWTP]() > 0:
-                    axs[i].plot(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS max removal')
+                    axs[i].plot(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS min conc')
             
             if plot_tag == 'removal':
                 axs[i].plot(self.datetime, SS_lim, '--', color = 'black',label = 'SS max removal')
@@ -1052,13 +1052,12 @@ if __name__ == "__main__":
     #print(m.__dict__)
 
 
-
+ 
     model = m.main()
 
     #fig, ax = m.plot_conc(model)
     #fig, ax = m.plot_flows(model)
-    fig, ax = m.plot_subfigures(model, 'removal')
-    fig, ax = m.plot_subfigures(model, 'conc')
+    
 
     if params["update_figures"]:
         # Plot binary variables
@@ -1069,6 +1068,10 @@ if __name__ == "__main__":
         fig, ax = m.plot_subfigures(model, 'zeta')
         fig, ax = m.plot_subfigures(model, 'z')
         fig, ax = m.plot_subfigures(model, 'b')
+
+        # Plot TIN Removal and Conc plots
+        fig, ax = m.plot_subfigures(model, 'removal')
+        fig, ax = m.plot_subfigures(model, 'conc')
 
         
         # Plot TIN Removal plots
