@@ -750,6 +750,43 @@ class capacity_expansion():
         
     
     # Plotting functions
+
+
+    # Plot flows for each WWTP
+    def plot_flows(self, model):
+        
+        colors = ['green', 'red', 'purple', 'black', 'yellow', 'pink', 'brown', 'grey']
+        hfont = {'fontname':'Helvetica', 'size':12}
+
+        # plot flows for each WWTP
+        for i, WWTP in enumerate(model.WWTP):
+            fig, ax = plt.subplots()
+            plt.plot(self.datetime, [value(model.flow[WWTP, t]) for t in model.t], '-', color=colors[i], label = 'Projected flows')
+            plt.xlabel('Year', **hfont)
+            plt.ylabel('Discharge Flow (mgd)', **hfont)
+            #fig.savefig(self.figpath + self.solver_type + '_'+ self.version_num + '_' + "flows" + str(WWTP)+ ".png")
+
+        return fig, ax
+    
+    # Plot effluent concentrations
+    def plot_conc(self, model):
+        
+        colors = ['green', 'red', 'purple', 'black', 'yellow', 'pink', 'brown', 'grey']
+        hfont = {'fontname':'Helvetica', 'size':12}
+
+        # plot flows for each WWTP
+        for i, WWTP in enumerate(model.WWTP):
+            fig, ax = plt.subplots()
+            TN_discharge = [value(model.dis[WWTP, t]) - value(model.r[WWTP,t])  for t in model.t]
+            TN_discharge_conc = [(value(model.dis[WWTP, t]) - value(model.r[WWTP,t]))/ value(model.flow[WWTP,t]) * self.lbNpermgd_to_mgNperL  for t in model.t]
+            plt.plot(self.datetime, TN_discharge_conc, '-', color=colors[i], label = WWTP)
+            plt.xlabel('Year', **hfont)
+            plt.ylabel('TN Concentration (mg N/L)', **hfont)
+
+        return fig, ax
+    
+    
+    # Plot regulations and required removal for each WWTP
     def plot_regulations(self, model):
         
         colors = ['green', 'red', 'purple', 'black', 'yellow', 'pink', 'brown', 'grey']
@@ -889,11 +926,34 @@ class capacity_expansion():
                 if plot_tag == 'capacity':
                     axs[i].plot(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
-                        axs[i].set_ylabel('Max TIN Removal Capacity (lb N/day)', **hfont)
+                        axs[i].set_ylabel('Max TN Removal Capacity (lb N/day)', **hfont)
+                
                 if plot_tag == 'conc':
-                    TN_conc = [(model.dis[WWTP,t]() - model.x[WWTP,L,t]()*model.status[WWTP,L,t]())/model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL for t in model.t]
-                    axs[i].plot(self.datetime, TN_conc, '-', color = colors[L],label = L)
+                    #create an array of zeros size model.t
+                    conc = np.zeros(len(model.t))
+                    L2_lim = np.ones(len(model.t)) * 15
+                    L3_lim = np.ones(len(model.t)) * 6
+                    SS_lim = np.zeros(len(model.t))
 
+                    for t in model.t:
+                        if model.status[WWTP,L,t]() > 0:
+                            conc[t] = (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
+                        SS_lim[t] = (model.dis[WWTP, t]() * model.SS_rem_per[WWTP]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
+                    axs[i].plot(self.datetime, conc, '-', color = colors[L],label = L)
+                    if i == ciel:
+                        axs[i].set_ylabel('Effluent TN Conc after upgrade (mg N/L)', **hfont)
+                
+                if plot_tag == 'removal':
+                    #create an array of zeros size model.t
+                    removal = np.zeros(len(model.t))
+                    SS_lim = np.ones(len(model.t)) * model.SS_rem_per[WWTP]() * 100
+                    for t in model.t:
+                        if model.status[WWTP,L,t]() > 0:
+                            removal[t] = (model.x[WWTP,L,t]())/ model.dis[WWTP, t]() * 100
+                    axs[i].plot(self.datetime, removal, '-', color = colors[L],label = L)
+                    axs[i].set_ylim(0, 100)
+                    if i == ciel:
+                        axs[i].set_ylabel('TN Removal (%)', **hfont)
                 
             
             if plot_tag == 'opex':
@@ -908,6 +968,15 @@ class capacity_expansion():
                     cum_capex.append(cum_capex_value)
                 axs[i].plot(self.datetime_years, cum_capex, '-', color = 'blue',label = 'Cumulative capex')
             
+            if plot_tag == 'conc':
+                axs[i].plot(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 min conc')
+                axs[i].plot(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 min conc')
+                if model.SS_rem_per[WWTP]() > 0:
+                    axs[i].plot(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS min conc')
+            
+            if plot_tag == 'removal':
+                axs[i].plot(self.datetime, SS_lim, '--', color = 'black',label = 'SS max removal')
+
             if i == ciel:
                 axs[i].legend(loc='lower left')   
             axs[i].set_title(WWTP, **hfont)
@@ -983,10 +1052,12 @@ if __name__ == "__main__":
     #print(m.__dict__)
 
 
-
+ 
     model = m.main()
 
-    fig, ax = m.plot_subfigures(model, 'conc')
+    #fig, ax = m.plot_conc(model)
+    #fig, ax = m.plot_flows(model)
+    
 
     if params["update_figures"]:
         # Plot binary variables
@@ -997,6 +1068,10 @@ if __name__ == "__main__":
         fig, ax = m.plot_subfigures(model, 'zeta')
         fig, ax = m.plot_subfigures(model, 'z')
         fig, ax = m.plot_subfigures(model, 'b')
+
+        # Plot TIN Removal and Conc plots
+        fig, ax = m.plot_subfigures(model, 'removal')
+        fig, ax = m.plot_subfigures(model, 'conc')
 
         
         # Plot TIN Removal plots
