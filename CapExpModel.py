@@ -352,9 +352,14 @@ class capacity_expansion():
         and regulations from Water Board SF Bay 2024.
 
         
-        Current discharge: SF Bay Water Board Nutrients Watershed Permit R2-2024-0023
-            - Average loads (kg/day) for 2019-2023
+        If Current discharge: SF Bay Water Board Nutrients Watershed Permit R2-2024-0023
+            - Average dry season loads (kg/day) for 2019-2023
             - Units: kg/day
+        
+        If Current discharge: ECHO database
+            - Average dry season loads (kg/day) and dry season flow (mgd) from 2019-07-31 to 2024-04-30 
+            - Values for WWTP downloaded from ECHO database (https://echo.epa.gov/)
+
         
         Projected discharge: BACWA 2017 Report Table: 
             -projected discharge loads are based on the 2015 BACWA Nutrient Reduction Study Group Annual Report 
@@ -370,8 +375,14 @@ class capacity_expansion():
         ## assumes linear increase in discharge from current to projected level
         discharge = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
-            current = df.loc[i, self.discharge_current_tag] * 2.204623                                       # convert kg/day to lbs/day
-            projected = df.loc[i, self.discharge_projected_tag] * self.projection_multiplier
+            if self.use_NPDES_for_current_TN_discharge:
+                current = df.loc[i, self.discharge_NPDES_current_tag] * 2.204623                             # convert kg/day to lbs/day
+            elif self.use_ECHO_for_current_TN_discharge:
+                current = df.loc[i, self.discharge_ECHO_current_tag] * 2.204623                             # convert kg/day to lbs/day
+            else:
+                raise SystemExit('specify how to calculate current discharge')
+            
+            projected = df.loc[i, self.discharge_BACWA_projected_tag] * self.projection_multiplier
             discharge[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         # regulations for each WWTP
@@ -387,6 +398,8 @@ class capacity_expansion():
             discharge_minus_regulations[i] = discharge[i] - regulations[i]
             # replace lower bound with 0
             discharge_minus_regulations[i] = discharge_minus_regulations[i].clip(lower=0)
+            if discharge_minus_regulations[i].iloc[0] > 0:
+                raise SystemExit('Initial discharge is greater than interim regulation for WWTP:', i)
 
 
         reg_dict = {(WWTP,t): regulations[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
@@ -401,8 +414,11 @@ class capacity_expansion():
         # Flow for each WWTP
         flow = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
-            current = df.loc[i, self.flow_current_tag]                                        # convert kg/day to lbs/day
-            projected = df.loc[i, self.flow_projected_tag] * self.projection_multiplier
+            if self.use_ECHO_for_current_TN_discharge:
+                current = df.loc[i, self.flow_ECHO_current_tag] 
+            else:
+                current = df.loc[i, self.flow_BACWA_current_tag]                                      # use BACWA for flow
+            projected = df.loc[i, self.flow_BACWA_projected_tag] * self.projection_multiplier
             flow[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         
