@@ -24,8 +24,12 @@ class capacity_expansion():
             setattr(self, k, v)
         
         # set up time periods of model
-        self.datetime = pd.date_range(start=self.start_date, periods = 12*self.total_years, freq=self.timestep_freq)
-        self.datetime_years = pd.date_range(start=self.start_date, periods = self.total_years, freq='YS')
+        start_date = pd.to_datetime(self.start_date)
+        self.datetime = pd.date_range(start=start_date, periods = 12*self.total_years, freq=self.timestep_freq)
+        
+        start_year = str(start_date.year)
+        end_year = str(self.datetime[-1].year)
+        self.datetime_years = pd.date_range(start=start_year, end = end_year, freq='YS')
 
     
     
@@ -82,8 +86,8 @@ class capacity_expansion():
         summary['Total_opex'] = [sum(model.opex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Max_capacity'] = [sum(model.x_max[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         for L in model.L:
-            summary[L+'_capex'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
-            summary[L+'_opex'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_capex_NPV'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_opex_NPV'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for WWTP in model.WWTP]
 
         summary.loc['Total'] = summary.sum()
@@ -102,6 +106,7 @@ class capacity_expansion():
                 results[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for t in model.t]
                 results[L+'_status'] = [model.status[WWTP,L,t].value for t in model.t]
                 results[L+'_x'] = [model.x[WWTP,L,t].value for t in model.t]
+                results [L + '_opex'] = [model.opex_monthly[WWTP,L,t].value for t in model.t]
                 results[L+'_eps'] = [model.eps[WWTP,L,t].value for t in model.t]
                 results[L+'_z'] = [model.z[WWTP,L,t].value for t in model.t]
                 results[L+'_b'] = [model.b[WWTP,L,t].value for t in model.t]
@@ -142,7 +147,7 @@ class capacity_expansion():
         model.t = range(len(self.datetime))
         model.WWTP = self.WWTP
         model.L = ['SS', 'L2', 'L2pt5', 'L3']                      # number of upgrades
-        model.years = range(self.total_years)
+        model.years = range(len(self.datetime_years))
 
         
         model.DualReductions = 0
@@ -352,9 +357,14 @@ class capacity_expansion():
         and regulations from Water Board SF Bay 2024.
 
         
-        Current discharge: SF Bay Water Board Nutrients Watershed Permit R2-2024-0023
-            - Average loads (kg/day) for 2019-2023
+        If Current discharge: SF Bay Water Board Nutrients Watershed Permit R2-2024-0023
+            - Average dry season loads (kg/day) for 2019-2023
             - Units: kg/day
+        
+        If Current discharge: ECHO database
+            - Average dry season loads (kg/day) and dry season flow (mgd) from 2019-07-31 to 2024-04-30 
+            - Values for WWTP downloaded from ECHO database (https://echo.epa.gov/)
+
         
         Projected discharge: BACWA 2017 Report Table: 
             -projected discharge loads are based on the 2015 BACWA Nutrient Reduction Study Group Annual Report 
@@ -370,8 +380,14 @@ class capacity_expansion():
         ## assumes linear increase in discharge from current to projected level
         discharge = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
-            current = df.loc[i, self.discharge_current_tag] * 2.204623                                       # convert kg/day to lbs/day
-            projected = df.loc[i, self.discharge_projected_tag] * self.projection_multiplier
+            if self.use_NPDES_for_current_TN_discharge:
+                current = df.loc[i, self.discharge_NPDES_current_tag] * 2.204623                             # convert kg/day to lbs/day
+            elif self.use_ECHO_for_current_TN_discharge:
+                current = df.loc[i, self.discharge_ECHO_current_tag] * 2.204623                             # convert kg/day to lbs/day
+            else:
+                raise SystemExit('specify how to calculate current discharge')
+            
+            projected = df.loc[i, self.discharge_BACWA_projected_tag] * self.projection_multiplier
             discharge[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         # regulations for each WWTP
@@ -387,6 +403,8 @@ class capacity_expansion():
             discharge_minus_regulations[i] = discharge[i] - regulations[i]
             # replace lower bound with 0
             discharge_minus_regulations[i] = discharge_minus_regulations[i].clip(lower=0)
+            if discharge_minus_regulations[i].iloc[0] > 0:
+                raise SystemExit('Initial discharge is greater than interim regulation for WWTP:', i)
 
 
         reg_dict = {(WWTP,t): regulations[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
@@ -401,8 +419,11 @@ class capacity_expansion():
         # Flow for each WWTP
         flow = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
-            current = df.loc[i, self.flow_current_tag]                                        # convert kg/day to lbs/day
-            projected = df.loc[i, self.flow_projected_tag] * self.projection_multiplier
+            if self.use_ECHO_for_current_TN_discharge:
+                current = df.loc[i, self.flow_ECHO_current_tag] 
+            else:
+                current = df.loc[i, self.flow_BACWA_current_tag]                                      # use BACWA for flow
+            projected = df.loc[i, self.flow_BACWA_projected_tag] * self.projection_multiplier
             flow[i] = np.linspace(current, projected, 
                                             len(self.datetime), endpoint=True) 
         
@@ -666,9 +687,12 @@ class capacity_expansion():
                     )
         
         def opex_yearly_NPV_cond(model, WWTP, L, years):
-            month_start = 12*(years)
-            month_end = 12*(years+1)
-            return model.opex_yearly_NPV[WWTP, L, years] == sum(model.opex_monthly[WWTP,L,t] for t in range(month_start,month_end)) / (1+self.discount_rate)**years
+            
+            year = self.datetime_years[years].year
+            ind_start = np.where(self.datetime.year == year)[0][0]
+            ind_end = np.where(self.datetime.year == year)[0][-1]
+        
+            return model.opex_yearly_NPV[WWTP, L, years] == sum(model.opex_monthly[WWTP,L,t] for t in range(ind_start,ind_end + 1)) / (1+self.discount_rate)**years
         
         def opex_NPV_cond(model, WWTP, L):
             return model.opex_NPV[WWTP, L] == sum(model.opex_yearly_NPV[WWTP, L,year] for year in model.years)
@@ -710,9 +734,11 @@ class capacity_expansion():
                     )
         
         def capex_yearly_NPV_cond(model, WWTP, L, years):
-            month_start = 12*(years)
-            month_end = 12*(years+1)
-            return model.capex_yearly_NPV[WWTP, L, years] == sum(model.capex_monthly[WWTP,L,t] for t in range(month_start,month_end)) / (1+self.discount_rate)**years
+            year = self.datetime_years[years].year
+            ind_start = np.where(self.datetime.year == year)[0][0]
+            ind_end = np.where(self.datetime.year == year)[0][-1]
+        
+            return model.capex_yearly_NPV[WWTP, L, years] == sum(model.capex_monthly[WWTP,L,t] for t in range(ind_start,ind_end + 1)) / (1+self.discount_rate)**years
         
         
         def capex_NPV_cond(model, WWTP, L):
@@ -989,7 +1015,7 @@ class capacity_expansion():
             axs[i].set_title(WWTP, **hfont)
         
         fig.tight_layout()    
-        fig.savefig(self.figpath + '_'+ self.version_num + '_' + self.Constraint_tag + '_' + str(plot_tag)+".png")
+        fig.savefig(self.figpath + self.solver_type + '_'+ self.version_num + '_' + self.Constraint_tag + '_' + str(plot_tag)+".png")
         return fig, axs
     
     
