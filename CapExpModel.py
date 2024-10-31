@@ -24,8 +24,12 @@ class capacity_expansion():
             setattr(self, k, v)
         
         # set up time periods of model
-        self.datetime = pd.date_range(start=self.start_date, periods = 12*self.total_years, freq=self.timestep_freq)
-        self.datetime_years = pd.date_range(start=self.start_date, periods = self.total_years, freq='YS')
+        start_date = pd.to_datetime(self.start_date)
+        self.datetime = pd.date_range(start=start_date, periods = 12*self.total_years, freq=self.timestep_freq)
+        
+        start_year = str(start_date.year)
+        end_year = str(self.datetime[-1].year)
+        self.datetime_years = pd.date_range(start=start_year, end = end_year, freq='YS')
 
     
     
@@ -82,8 +86,8 @@ class capacity_expansion():
         summary['Total_opex'] = [sum(model.opex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Max_capacity'] = [sum(model.x_max[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         for L in model.L:
-            summary[L+'_capex'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
-            summary[L+'_opex'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_capex_NPV'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_opex_NPV'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for WWTP in model.WWTP]
 
         summary.loc['Total'] = summary.sum()
@@ -102,6 +106,7 @@ class capacity_expansion():
                 results[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for t in model.t]
                 results[L+'_status'] = [model.status[WWTP,L,t].value for t in model.t]
                 results[L+'_x'] = [model.x[WWTP,L,t].value for t in model.t]
+                results [L + '_opex'] = [model.opex_monthly[WWTP,L,t].value for t in model.t]
                 results[L+'_eps'] = [model.eps[WWTP,L,t].value for t in model.t]
                 results[L+'_z'] = [model.z[WWTP,L,t].value for t in model.t]
                 results[L+'_b'] = [model.b[WWTP,L,t].value for t in model.t]
@@ -142,7 +147,7 @@ class capacity_expansion():
         model.t = range(len(self.datetime))
         model.WWTP = self.WWTP
         model.L = ['SS', 'L2', 'L2pt5', 'L3']                      # number of upgrades
-        model.years = range(self.total_years)
+        model.years = range(len(self.datetime_years))
 
         
         model.DualReductions = 0
@@ -682,9 +687,12 @@ class capacity_expansion():
                     )
         
         def opex_yearly_NPV_cond(model, WWTP, L, years):
-            month_start = 12*(years)
-            month_end = 12*(years+1)
-            return model.opex_yearly_NPV[WWTP, L, years] == sum(model.opex_monthly[WWTP,L,t] for t in range(month_start,month_end)) / (1+self.discount_rate)**years
+            
+            year = self.datetime_years[years].year
+            ind_start = np.where(self.datetime.year == year)[0][0]
+            ind_end = np.where(self.datetime.year == year)[0][-1]
+        
+            return model.opex_yearly_NPV[WWTP, L, years] == sum(model.opex_monthly[WWTP,L,t] for t in range(ind_start,ind_end + 1)) / (1+self.discount_rate)**years
         
         def opex_NPV_cond(model, WWTP, L):
             return model.opex_NPV[WWTP, L] == sum(model.opex_yearly_NPV[WWTP, L,year] for year in model.years)
@@ -726,9 +734,11 @@ class capacity_expansion():
                     )
         
         def capex_yearly_NPV_cond(model, WWTP, L, years):
-            month_start = 12*(years)
-            month_end = 12*(years+1)
-            return model.capex_yearly_NPV[WWTP, L, years] == sum(model.capex_monthly[WWTP,L,t] for t in range(month_start,month_end)) / (1+self.discount_rate)**years
+            year = self.datetime_years[years].year
+            ind_start = np.where(self.datetime.year == year)[0][0]
+            ind_end = np.where(self.datetime.year == year)[0][-1]
+        
+            return model.capex_yearly_NPV[WWTP, L, years] == sum(model.capex_monthly[WWTP,L,t] for t in range(ind_start,ind_end + 1)) / (1+self.discount_rate)**years
         
         
         def capex_NPV_cond(model, WWTP, L):
@@ -1005,7 +1015,7 @@ class capacity_expansion():
             axs[i].set_title(WWTP, **hfont)
         
         fig.tight_layout()    
-        fig.savefig(self.figpath + '_'+ self.version_num + '_' + self.Constraint_tag + '_' + str(plot_tag)+".png")
+        fig.savefig(self.figpath + self.solver_type + '_'+ self.version_num + '_' + self.Constraint_tag + '_' + str(plot_tag)+".png")
         return fig, axs
     
     
