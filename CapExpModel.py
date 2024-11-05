@@ -964,7 +964,7 @@ class capacity_expansion():
                     for t in model.t:
                         if model.status[WWTP,L,t]() > 0:
                             conc[t] = (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
-                        SS_lim[t] = (model.dis[WWTP, t]() * model.SS_rem_per[WWTP]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
+                        SS_lim[t] = (model.dis[WWTP, t]() * (1- model.SS_rem_per[WWTP]()))/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                     axs[i].plot(self.datetime, conc, '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Effluent TN Conc after upgrade (mg N/L)', **hfont)
