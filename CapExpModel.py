@@ -170,6 +170,7 @@ class capacity_expansion():
         model = self.add_max_capacity_constraints(model)
         model = self.add_build_upgrade_constraint(model)
         model = self.add_integer_constraints(model)
+        model = self.add_max_removal_upgrade_constraint(model)
         
 
         
@@ -213,15 +214,18 @@ class capacity_expansion():
         LB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
         UB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
 
-        SS_rem_per = {i: df.loc[i, self.SS_per_removal_tag] for i in self.WWTP}
-
         model.UB = Param(model.WWTP, model.L, initialize=UB, mutable=True)
         model.LB = Param(model.WWTP, model.L, initialize=LB, mutable=True)
 
         model.UB_max = Param(model.WWTP, model.L, initialize=UB_max, mutable=True)
         model.LB_max = Param(model.WWTP, model.L, initialize=LB_max, mutable=True)
 
+        
+        # define time-dependent bounds for each upgrade
+        
+        SS_rem_per = {i: df.loc[i, self.SS_per_removal_tag] for i in self.WWTP}
         model.SS_rem_per = Param(model.WWTP, initialize=SS_rem_per, mutable=True)
+        
 
 
         return model
@@ -430,6 +434,31 @@ class capacity_expansion():
         flow_dict = {(WWTP,t): flow[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
         model.flow = Param(model.WWTP, model.t, initialize=flow_dict, mutable=True)
 
+        # define max amount of removal by each upgrade
+        L2_bound_discharge = pd.DataFrame(index=self.datetime, columns=df.index)
+        L3_bound_discharge = pd.DataFrame(index=self.datetime, columns=df.index)
+        
+        for i in model.WWTP:
+            L2_bound_discharge[i] = discharge[i] - 15 *flow[i] / self.lbNpermgd_to_mgNperL
+            L3_bound_discharge[i] = discharge[i] - 6 *flow[i] / self.lbNpermgd_to_mgNperL
+            # replace lower bound with 0
+            L2_bound_discharge[i] = L2_bound_discharge[i].clip(lower=0)
+            L3_bound_discharge[i] = L3_bound_discharge[i].clip(lower=0)
+        """
+        for WWTP in model.WWTP:
+            for t in model.t:
+                # L2 can remove TN to reach 15 mg/L
+                L2_bound_discharge.loc[t, WWTP] = discharge[WWTP].iloc[t] - 15 *flow[WWTP].iloc[t] / self.lbNpermgd_to_mgNperL
+                # L3 can remove TN to reach 6 mg/L
+                L3_bound_discharge.loc[t, WWTP] = discharge[WWTP].iloc[t] - 6 *flow[WWTP].iloc[t] / self.lbNpermgd_to_mgNperL
+        """
+
+        L2_bound_dict = {(WWTP,t): L2_bound_discharge[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
+        L3_bound_dict = {(WWTP,t): L3_bound_discharge[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
+        
+        model.L2_bound = Param(model.WWTP, model.t, initialize=L2_bound_dict, mutable=True)
+        model.L3_bound = Param(model.WWTP, model.t, initialize=L3_bound_dict, mutable=True)
+        
         return model
 
 
@@ -461,14 +490,38 @@ class capacity_expansion():
         def L2pt5_L3_constraint(model, WWTP, t):
             return model.eps[WWTP,'L3',t] <= 1 - model.eps[WWTP,'L2pt5',t]
         model.integer_constraint_L2pt5L3 = Constraint(model.WWTP, model.t, rule=L2pt5_L3_constraint)
+        
+        return model
+
+    def add_max_removal_upgrade_constraint(self, model):
 
         # Constraint that SS can only operate at the max limit removal of current discharge
         def SS_bound_constraint(model, WWTP, t):
             return model.x[WWTP,'SS',t]*model.status[WWTP,'SS',t]  <= model.SS_rem_per[WWTP] * model.dis[WWTP, t]
+        
         model.SS_upper_bound = Constraint(model.WWTP, model.t, rule=SS_bound_constraint)
+    
+        # Constraint that L2 can only operate to produce 15 mg/L of TN
+        def L2_bound_constraint(model, WWTP, t):
+            return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t]  <= model.L2_bound[WWTP,t]
+            
+        model.L2_upper_bound = Constraint(model.WWTP, model.t, rule=L2_bound_constraint)
+
+        # Constraint that L3 can only operate to produce 6 mg/L of TN
+        def L3_bound_constraint(model, WWTP, t):
+            return model.x[WWTP,'L3',t]*model.status[WWTP,'L3',t]  <= model.L3_bound[WWTP,t]
+        
+        model.L3_upper_bound = Constraint(model.WWTP, model.t, rule=L3_bound_constraint)
+
+        # Constraint that L2 upgraded to L2.5 can only operate to produce 6 mg/L of TN
+        def L2pt5_bound_constraint(model, WWTP, t):
+            return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t] + model.x[WWTP,'L2pt5',t]*model.status[WWTP,'L2pt5',t]  <= model.L3_bound[WWTP,t]
+        
+        model.L2pt5_upper_bound = Constraint(model.WWTP, model.t, rule=L2pt5_bound_constraint)
         
         return model
-
+    
+    
     
     def add_capacity_constraints(self, model):
         """
