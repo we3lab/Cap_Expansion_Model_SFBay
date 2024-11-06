@@ -2,7 +2,7 @@
     "Constraint_tag": "Individual",
     "Objective_tag": "Opex",
     "solver_type": "gurobi",
-    "version_num": "May_start_date_5Nov24",
+    "version_num": "Add_L2_L3_constraint_5Nov24",
     "seasonal_regulation": true,
     "include_L3": true,
     "include_L2": true,
