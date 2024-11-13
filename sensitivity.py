@@ -7,7 +7,7 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath)     
 params = json.load(open(fp))
 
-params["version_num"] = 'sensivity_analysis_31Oct24'
+params["version_num"] = 'sensivity_analysis_07Nov24'
 params["Constraint_tag"] = "Subembayment"
 params["seasonal_regulation"] = True
 
