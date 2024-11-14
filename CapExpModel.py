@@ -386,11 +386,30 @@ class capacity_expansion():
 
         return model
 
+
     def fix_capex_investment_constraints(self, model):
         """
         Fix capex investment constraints for opex only model
         LP_model
         """
+        try:
+            year = self.datetime_years[self.market_year].year 
+            ind_end = np.where(self.datetime.year == year)[0][-1] - len(self.datetime.year[self.datetime.year == year])
+            print('Market starts at year:', self.market_year)
+            '''
+            print('year:', year) 
+            print('ind_end:', ind_end)
+            print('date at end index:', self.datetime[ind_end])
+            print('t at end index:', model.t[ind_end])
+            '''
+        except: 
+            print('Assuming market is never established')
+            print('Running optimization as MILP model to meet individual permits')
+            model = self.add_integer_variables(model)
+            model = self.set_integer_variables(model)
+            self.Constraint_tag = "Individual"
+            return model
+
         eps_fix = {}; z_fix = {}; b_fix = {}; u_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
         for WWTP in model.WWTP:
             path = self.figpath_capex +'results_'+ WWTP +'.csv'
@@ -410,24 +429,22 @@ class capacity_expansion():
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= zeta_fix, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= status_fix, doc='Binary variable that determines when an upgrade is operated after built is completed')
         
-        model.x_max = Var(model.WWTP, model.L, initialize=x_max_fix)    # Mmaximum nitrogen removed by each facility by each upgrade
-        #print(model.eps[WWTP, 'SS', 300].fix())
-        '''
-        for WWTP in ['Palo Alto']:
-            for t in model.t:
-                for L in model.L:
-                    model.eps[WWTP, L, t].fix()
-        '''
-        model.eps.fix()
-        model.z.fix()
-        model.b.fix()
-        model.u.fix()
-        model.zeta.fix()
-        model.status.fix()
-        model.x_max.fix()
+        #model.x_max = Var(model.WWTP, model.L, initialize=x_max_fix)    # Maximum nitrogen removed by each facility by each upgrade
+
+
+        for t in range(0, ind_end + 1):
+            model.eps[:,:,t].fix()
+            model.z[:,:,t].fix()
+            model.b[:,:,t].fix()
+            model.u[:,:,t].fix()
+            model.zeta[:,:,t].fix()
+            model.status[:,:,t].fix()
+        
+        #model.x_max.fix()
 
         return model
 
+    
     def add_regulation_params(self, model, df):
         """
         Add regulatory parameters to the model
