@@ -121,8 +121,38 @@ class capacity_expansion():
                 results_econ[L+'_capex'] = [model.capex_yearly_NPV[WWTP,L,year].value for year in model.years]
                 results_econ[L+'_opex'] = [model.opex_yearly_NPV[WWTP,L,year].value for year in model.years]
             results_econ.to_csv(self.figpath +'results_econ_'+WWTP+'.csv')
-                    
+            
+        if self.update_figures:
+            # Plot binary variables
+            fig, ax = self.plot_regulations(model)
+            fig, ax = self.plot_subfigures(model, 'eps')
+            fig, ax = self.plot_subfigures(model, 'x')
+            fig, ax = self.plot_subfigures(model, 'u')
+            fig, ax = self.plot_subfigures(model, 'zeta')
+            fig, ax = self.plot_subfigures(model, 'z')
+            fig, ax = self.plot_subfigures(model, 'b')
 
+            # Plot TIN Removal and Conc plots
+            fig, ax = self.plot_subfigures(model, 'removal')
+            fig, ax = self.plot_subfigures(model, 'conc')
+
+            
+            # Plot TIN Removal plots
+            if self.Constraint_tag == 'Individual':
+                fig, ax = self.plot_discharge_post_individual(model, 'removed')
+            
+            fig, ax = self.plot_discharge_post_individual(model, 'capacity')
+            fig, ax = self.plot_discharge_post_subembayment(model, 'removed')
+            fig, ax = self.plot_discharge_post_subembayment(model, 'capacity')
+            fig, ax = self.plot_subfigures(model, 'capacity')
+            fig, ax = self.plot_subfigures(model, 'x_status')
+            
+            # Plot economic plots
+            fig, ax = self.plot_subfigures(model, 'opex')
+            fig, ax = self.plot_subfigures(model, 'capex')
+            
+            # plot infrastructure schedules
+            fig = self.infrastructure_schedule(model)
 
         
 
@@ -158,10 +188,15 @@ class capacity_expansion():
         model = self.add_capex_params(model, df)
         model = self.add_opex_params(model, df)
 
+        # Add constraint if only opex trading model
+        if self.only_opex_trading:
+            model = self.fix_capex_investment_constraints(model)
+        else: 
+            model = self.add_integer_variables(model)
+            model = self.set_integer_variables(model)
+        
         # Add variables
         model = self.add_upgrade_variables(model)
-        model = self.add_integer_variables(model)
-        model = self.set_integer_variables(model)
         
         
         # Add constraints
@@ -171,7 +206,6 @@ class capacity_expansion():
         model = self.add_build_upgrade_constraint(model)
         model = self.add_integer_constraints(model)
         model = self.add_max_removal_upgrade_constraint(model)
-        
 
         
         # Set objectives
@@ -297,7 +331,6 @@ class capacity_expansion():
         """
 
         model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines if an upgrade is operated')
-
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade starts being built')
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade finishes being built')
         model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
@@ -310,8 +343,8 @@ class capacity_expansion():
 
     def set_integer_variables(self,model):
         """
-        Set integer variables for opex only model
-        LP_model
+        Set integer variables
+        Unfix variables for technologies used in the model
         """
 
         model.eps.fix(0)
@@ -353,6 +386,47 @@ class capacity_expansion():
 
         return model
 
+    def fix_capex_investment_constraints(self, model):
+        """
+        Fix capex investment constraints for opex only model
+        LP_model
+        """
+        eps_fix = {}; z_fix = {}; b_fix = {}; u_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
+        for WWTP in model.WWTP:
+            path = self.figpath_capex +'results_'+ WWTP +'.csv'
+            df = pd.read_csv(path)
+            eps_fix ={**eps_fix, **{(WWTP, L, t): int(df.loc[t, L+'_eps']) for L in model.L for t in model.t}}
+            z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
+            b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
+            u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
+            zeta_fix = {**zeta_fix, **{(WWTP, L, t): int(df.loc[t, L+'_zeta']) for L in model.L for t in model.t}}
+            status_fix = {**status_fix, **{(WWTP, L, t): int(df.loc[t, L+'_status']) for L in model.L for t in model.t}}
+            x_max_fix = {**{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
+
+        model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize= eps_fix, doc='Binary variable that determines if an upgrade is operated')
+        model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize= z_fix, doc='Binary variable that is 1 from when the upgrade starts being built')
+        model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize= b_fix, doc='Binary variable that is 1 from when the upgrade finishes being built')
+        model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize= u_fix, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
+        model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= zeta_fix, doc='Binary variable that determines when an upgrade build is completed')
+        model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= status_fix, doc='Binary variable that determines when an upgrade is operated after built is completed')
+        
+        model.x_max = Var(model.WWTP, model.L, initialize=x_max_fix)    # Mmaximum nitrogen removed by each facility by each upgrade
+        #print(model.eps[WWTP, 'SS', 300].fix())
+        '''
+        for WWTP in ['Palo Alto']:
+            for t in model.t:
+                for L in model.L:
+                    model.eps[WWTP, L, t].fix()
+        '''
+        model.eps.fix()
+        model.z.fix()
+        model.b.fix()
+        model.u.fix()
+        model.zeta.fix()
+        model.status.fix()
+        model.x_max.fix()
+
+        return model
 
     def add_regulation_params(self, model, df):
         """
@@ -1140,41 +1214,5 @@ if __name__ == "__main__":
 
  
     model = m.main()
-
-    #fig, ax = m.plot_conc(model)
-    #fig, ax = m.plot_flows(model)
-    
-
-    if params["update_figures"]:
-        # Plot binary variables
-        fig, ax = m.plot_regulations(model)
-        fig, ax = m.plot_subfigures(model, 'eps')
-        fig, ax = m.plot_subfigures(model, 'x')
-        fig, ax = m.plot_subfigures(model, 'u')
-        fig, ax = m.plot_subfigures(model, 'zeta')
-        fig, ax = m.plot_subfigures(model, 'z')
-        fig, ax = m.plot_subfigures(model, 'b')
-
-        # Plot TIN Removal and Conc plots
-        fig, ax = m.plot_subfigures(model, 'removal')
-        fig, ax = m.plot_subfigures(model, 'conc')
-
-        
-        # Plot TIN Removal plots
-        if m.Constraint_tag == 'Individual':
-            fig, ax = m.plot_discharge_post_individual(model, 'removed')
-        
-        fig, ax = m.plot_discharge_post_individual(model, 'capacity')
-        fig, ax = m.plot_discharge_post_subembayment(model, 'removed')
-        fig, ax = m.plot_discharge_post_subembayment(model, 'capacity')
-        fig, ax = m.plot_subfigures(model, 'capacity')
-        fig, ax = m.plot_subfigures(model, 'x_status')
-        
-        # Plot economic plots
-        fig, ax = m.plot_subfigures(model, 'opex')
-        fig, ax = m.plot_subfigures(model, 'capex')
-        
-        # plot infrastructure schedules
-        fig = m.infrastructure_schedule(model)
 
     
