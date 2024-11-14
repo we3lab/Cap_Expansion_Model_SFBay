@@ -12,6 +12,7 @@
     "sensitivity_analysis": false,
     "use_NPDES_for_current_TN_discharge": false,
     "use_ECHO_for_current_TN_discharge": true,
+    "only_opex_trading": false,
     "discount_rate": 0.02,
     "total_years" : 30,
     "start_date" :"2024-05-01",
