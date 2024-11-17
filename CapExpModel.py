@@ -138,7 +138,7 @@ class capacity_expansion():
 
             
             # Plot TIN Removal plots
-            if self.Constraint_tag == 'Individual':
+            if self.Constraint_tag == 'No_coordination':
                 fig, ax = self.plot_discharge_post_individual(model, 'removed')
             
             fig, ax = self.plot_discharge_post_individual(model, 'capacity')
@@ -188,24 +188,27 @@ class capacity_expansion():
         model = self.add_capex_params(model, df)
         model = self.add_opex_params(model, df)
 
-        # Add constraint if only opex trading model
-        if self.fix_infrastructure:
-            model = self.fix_capex_investment_constraints(model)
-        else: 
-            model = self.add_integer_variables(model)
-            model = self.set_integer_variables(model)
         
         # Add variables
         model = self.add_upgrade_variables(model)
         
+        # Add constraint if joint_infrastructure_occurs
+        
+        model = self.fix_capex_investment_constraints(model)
+
         
         # Add constraints
         model = self.add_capacity_constraints(model)
-        model = self.add_regulatory_constraints(model, self.Constraint_tag)
+        #model = self.add_regulatory_constraints(model, self.Constraint_tag)
         model = self.add_max_capacity_constraints(model)
         model = self.add_build_upgrade_constraint(model)
         model = self.add_integer_constraints(model)
         model = self.add_max_removal_upgrade_constraint(model)
+
+                
+        model = self.add_trading_market_constraint(model)
+        
+
 
         
         # Set objectives
@@ -337,6 +340,11 @@ class capacity_expansion():
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines when an upgrade is operated after built is completed')
 
+        # Fix initial eps at 0
+        model.eps[:,:,0].fix(0)
+        model.u[:,:,0].fix(0)
+        model.zeta[:,:,0].fix(0)
+
 
         return model
 
@@ -346,31 +354,27 @@ class capacity_expansion():
         Set integer variables
         Unfix variables for technologies used in the model
         """
-
-        model.eps.fix(0)
-        model.u.fix(0)
-        model.zeta.fix(0)
         
 
-        if self.include_L3:
-            model.eps[:,'L3',:].unfix()
-            model.u[:,'L3',:].unfix()
-            model.zeta[:,'L3',:].unfix()
+        if not self.include_L3:
+            model.eps[:,'L3',:].fix(0)
+            model.u[:,'L3',:].fix(0)
+            model.zeta[:,'L3',:].fix(0)
         
-        if self.include_L2:
-            model.eps[:,'L2',:].unfix()
-            model.u[:,'L2',:].unfix()
-            model.zeta[:,'L2',:].unfix()
+        if not self.include_L2:
+            model.eps[:,'L2',:].fix(0)
+            model.u[:,'L2',:].fix(0)
+            model.zeta[:,'L2',:].fix(0)
         
-        if self.include_L2pt5:
-            model.eps[:,'L2pt5',:].unfix()
-            model.u[:,'L2pt5',:].unfix()
-            model.zeta[:,'L2pt5',:].unfix()
+        if not self.include_L2pt5:
+            model.eps[:,'L2pt5',:].fix(0)
+            model.u[:,'L2pt5',:].fix(0)
+            model.zeta[:,'L2pt5',:].fix(0)
         
-        if self.include_SS:
-            model.eps[:,'SS',:].unfix()
-            model.u[:,'SS',:].unfix()
-            model.zeta[:,'SS',:].unfix()
+        if not self.include_SS:
+            model.eps[:,'SS',:].fix(0)
+            model.u[:,'SS',:].fix(0)
+            model.zeta[:,'SS',:].fix(0)
 
         for WWTP in model.WWTP:
             for L in model.L:
@@ -379,10 +383,46 @@ class capacity_expansion():
                     model.u[WWTP, L, :].fix(0)
                     model.zeta[WWTP, L, :].fix(0)
         
-        # Fix initial eps at 0
-        model.eps[:,:,0].fix(0)
-        model.u[:,:,0].fix(0)
-        model.zeta[:,:,0].fix(0)
+        return model
+
+
+    def add_trading_market_constraint(self, model):
+        
+        """
+        If trading market is not allowed:
+            - add constraint that each WWTP must meet its own discharge limit in each year
+        
+        If trading market is allowed at a certain year, add constraint to remove market in previous years:
+            - add requirement that each WWTP must meet its own discharge limit in each year
+        """
+        
+        if not self.trading_market:
+            self.trading_market_year = None    
+        
+        try:
+            year = self.datetime_years[self.trading_market_year].year 
+            ind_end = np.where(self.datetime.year == year)[0][-1] - len(self.datetime.year[self.datetime.year == year])
+            print('Trading market starts in year:', self.trading_market_year)
+            '''
+            print('year:', year) 
+            print('ind_end:', ind_end)
+            print('date at end index:', self.datetime[ind_end])
+            print('t at end index:', model.t[ind_end])
+            '''
+        except: 
+            print('Assuming trading market is never established')
+            print('Requiring all infrastructure to meet their own individual permits')
+            ind_end = len(self.datetime)
+
+        
+        # Constraint that the total WWTP discharge must be less than the WWTP regulation
+        def regulation(model, WWTP, t):
+            if t <= ind_end:
+                return model.r[WWTP,t] >= model.dis_minus_reg[WWTP,t]
+            else:
+                return sum(model.r[WWTP,t] for WWTP in model.WWTP) >= sum(model.dis_minus_reg[WWTP,t] for WWTP in model.WWTP)
+        
+        model.regulation = Constraint(model.WWTP, model.t, rule=regulation)
 
         return model
 
@@ -392,34 +432,48 @@ class capacity_expansion():
         Fix capex investment constraints for opex only model
         LP_model
         """
+        if not self.trading_market:
+            print('Trading market is not allowed')
+            print('Running MILP model to optimize infrastructure to meet individual discharge limits')
+            self.unfix_infrastructure_year = None
+            model = self.add_integer_variables(model)
+            model = self.set_integer_variables(model)
+            return model
+        
         try:
             year = self.datetime_years[self.unfix_infrastructure_year].year 
             ind_end = np.where(self.datetime.year == year)[0][-1] - len(self.datetime.year[self.datetime.year == year])
-            print('Joint infrastructure starts at year:', self.unfix_infrastructure_year)
-            '''
-            print('year:', year) 
-            print('ind_end:', ind_end)
-            print('date at end index:', self.datetime[ind_end])
-            print('t at end index:', model.t[ind_end])
-            '''
+            if not self.joint_infrastructure:
+                print('Joint infrastructure is not allowed')
+                print('Fixing infrastructure that meets individual discharge limits')
+                ind_end = len(self.datetime)
+            else:
+                print('Joint infrastructure planning starts at year:', self.unfix_infrastructure_year)   
+
         except: 
             print('Assuming joint infrastructure is never established')
-            print('Fixing all infrastructure to meet individual permits')
+            print('Fixing infrastructure to meet individual discharge limits')
             ind_end = len(self.datetime)
 
         eps_fix = {}; z_fix = {}; b_fix = {}; u_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
+        
         for WWTP in model.WWTP:
-            path = self.figpath_capex +'results_'+ WWTP +'.csv'
+            try:
+                path = self.figpath_capex +'results_'+ WWTP +'.csv'
+            except:
+                if self.Constraint_tag == 'Partial_coordination':
+                    raise SystemExit('Cannot find data for prior infrastructure investments to run Partial Coordination model')
+                print('Cannot find data for prior infrastructure investments')
+                print('Running MILP model with all infrastructure unfixed')
+                model = self.add_integer_variables(model)
+                model = self.set_integer_variables(model)
+                return model
+            
             df = pd.read_csv(path)
-            #eps_fix ={**eps_fix, **{(WWTP, L, t): int(df.loc[t, L+'_eps']) for L in model.L for t in model.t}}
             z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
             b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
             u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
-            #zeta_fix = {**zeta_fix, **{(WWTP, L, t): int(df.loc[t, L+'_zeta']) for L in model.L for t in model.t}}
-            #status_fix = {**status_fix, **{(WWTP, L, t): int(df.loc[t, L+'_status']) for L in model.L for t in model.t}}
-            #x_max_fix = {**{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
 
-        
         
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize= z_fix, doc='Binary variable that is 1 from when the upgrade starts being built')
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize= b_fix, doc='Binary variable that is 1 from when the upgrade finishes being built')
@@ -432,13 +486,13 @@ class capacity_expansion():
 
 
         for t in range(0, ind_end + 1):
-            #model.eps[:,:,t].fix()
             model.z[:,:,t].fix()
             model.b[:,:,t].fix()
             model.u[:,:,t].fix()
-            #model.zeta[:,:,t].fix()
-            #model.status[:,:,t].fix()
         
+        # does not allow building certain upgrades if they are not included in the model
+        # fixes SS upgrade at 0 if it is not an option for a WWTP
+        model = self.set_integer_variables(model)
 
         return model
 
@@ -640,25 +694,21 @@ class capacity_expansion():
         return model
 
     
-    def add_regulatory_constraints(self, model, Constraint_tag):
+    def add_regulatory_constraints(self, model):
+        
         """
-        Add Constraints to the model based on discharge and regulation type
-        Two regulations are possible based on Constraint_tag:
-            1) Individual: Total discharge by each WWTP must be less than WWTP regulation
-            2) Subembayment: Total removal by all WWTPs should be less than the sum of combined WWTP discharge regulation
+        Add Constraints that total amount of nutrients discharged into the subembayment
+        must be less than the sum of limits of all WWTPs.
+        
+        If a trading market is not established, then the individual discharge of each WWTP 
+        must meet each of their limits. 
+
         """
         
-        if Constraint_tag == 'Individual':
-        # Constraint that the total WWTP discharge must be less than the WWTP regulation
-            def regulation(model, WWTP, t):
-                return model.r[WWTP,t] >= model.dis_minus_reg[WWTP,t]
-            model.regulation = Constraint(model.WWTP, model.t, rule=regulation)
-
-        if Constraint_tag == 'Subembayment':
         # Constraint that the total WWTP discharge by all WWTP in the subembayment must be less than the sum of WWTP regulations
-            def regulation(model, t):
-                return sum(model.r[WWTP,t] for WWTP in model.WWTP) >= sum(model.dis_minus_reg[WWTP,t] for WWTP in model.WWTP)
-            model.regulation = Constraint(model.t, rule=regulation)
+        def regulation(model, t):
+            return sum(model.r[WWTP,t] for WWTP in model.WWTP) >= sum(model.dis_minus_reg[WWTP,t] for WWTP in model.WWTP)
+        model.regulation = Constraint(model.t, rule=regulation)
 
         return model
 
@@ -1192,9 +1242,23 @@ if __name__ == "__main__":
     basepath = "CapExpParams.json"    # use for running the script in jupyter notebook
     fp = os.path.join(os.getcwd(),basepath)     
     params = json.load(open(fp))
-    
-    if params['sensitivity_analysis']:
 
+    # Define constraint tag based on the model type
+    if params['trading_market'] and params['joint_infrastructure']:
+        params['Constraint_tag'] = 'Full_coordination'
+    elif params['trading_market']:
+        params['Constraint_tag'] = 'Partial_coordination'
+        if params['seasonal_regulation']:
+            params['figpath_capex'] = 'Figures/' + params['version_num'] + "/Seasonal/" + 'No_coordination' + "/"
+        else:
+            params['figpath_capex'] = 'Figures/' + params['version_num'] + "/Year_round/" + 'No_coordination' + "/"
+    else:
+        params['Constraint_tag'] = 'No_coordination'
+    
+
+    # Define folder names for sensitivity analysis runs
+
+    if params['sensitivity_analysis']:
         mult = params['projection_multiplier']
         
         if not os.path.exists('Sensitivity/'):
