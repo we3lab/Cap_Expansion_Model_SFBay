@@ -189,7 +189,7 @@ class capacity_expansion():
         model = self.add_opex_params(model, df)
 
         # Add constraint if only opex trading model
-        if self.only_opex_trading:
+        if self.fix_infrastructure:
             model = self.fix_capex_investment_constraints(model)
         else: 
             model = self.add_integer_variables(model)
@@ -393,9 +393,9 @@ class capacity_expansion():
         LP_model
         """
         try:
-            year = self.datetime_years[self.market_year].year 
+            year = self.datetime_years[self.unfix_infrastructure_year].year 
             ind_end = np.where(self.datetime.year == year)[0][-1] - len(self.datetime.year[self.datetime.year == year])
-            print('Market starts at year:', self.market_year)
+            print('Joint infrastructure starts at year:', self.unfix_infrastructure_year)
             '''
             print('year:', year) 
             print('ind_end:', ind_end)
@@ -403,44 +403,42 @@ class capacity_expansion():
             print('t at end index:', model.t[ind_end])
             '''
         except: 
-            print('Assuming market is never established')
-            print('Running optimization as MILP model to meet individual permits')
-            model = self.add_integer_variables(model)
-            model = self.set_integer_variables(model)
-            self.Constraint_tag = "Individual"
-            return model
+            print('Assuming joint infrastructure is never established')
+            print('Fixing all infrastructure to meet individual permits')
+            ind_end = len(self.datetime)
 
         eps_fix = {}; z_fix = {}; b_fix = {}; u_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
         for WWTP in model.WWTP:
             path = self.figpath_capex +'results_'+ WWTP +'.csv'
             df = pd.read_csv(path)
-            eps_fix ={**eps_fix, **{(WWTP, L, t): int(df.loc[t, L+'_eps']) for L in model.L for t in model.t}}
+            #eps_fix ={**eps_fix, **{(WWTP, L, t): int(df.loc[t, L+'_eps']) for L in model.L for t in model.t}}
             z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
             b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
             u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
-            zeta_fix = {**zeta_fix, **{(WWTP, L, t): int(df.loc[t, L+'_zeta']) for L in model.L for t in model.t}}
-            status_fix = {**status_fix, **{(WWTP, L, t): int(df.loc[t, L+'_status']) for L in model.L for t in model.t}}
-            x_max_fix = {**{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
+            #zeta_fix = {**zeta_fix, **{(WWTP, L, t): int(df.loc[t, L+'_zeta']) for L in model.L for t in model.t}}
+            #status_fix = {**status_fix, **{(WWTP, L, t): int(df.loc[t, L+'_status']) for L in model.L for t in model.t}}
+            #x_max_fix = {**{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
 
-        model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize= eps_fix, doc='Binary variable that determines if an upgrade is operated')
+        
+        
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize= z_fix, doc='Binary variable that is 1 from when the upgrade starts being built')
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize= b_fix, doc='Binary variable that is 1 from when the upgrade finishes being built')
         model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize= u_fix, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
-        model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= zeta_fix, doc='Binary variable that determines when an upgrade build is completed')
-        model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= status_fix, doc='Binary variable that determines when an upgrade is operated after built is completed')
         
-        #model.x_max = Var(model.WWTP, model.L, initialize=x_max_fix)    # Maximum nitrogen removed by each facility by each upgrade
+        model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines if an upgrade is operated')
+        model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade build is completed')
+        model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade is operated after built is completed')
+        
 
 
         for t in range(0, ind_end + 1):
-            model.eps[:,:,t].fix()
+            #model.eps[:,:,t].fix()
             model.z[:,:,t].fix()
             model.b[:,:,t].fix()
             model.u[:,:,t].fix()
-            model.zeta[:,:,t].fix()
-            model.status[:,:,t].fix()
+            #model.zeta[:,:,t].fix()
+            #model.status[:,:,t].fix()
         
-        #model.x_max.fix()
 
         return model
 
