@@ -7,13 +7,13 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath)     
 params = json.load(open(fp))
 
-params["version_num"] = 'loop_over_market_years_14Nov24'
+params["version_num"] = 'loop_over_market_years_16Nov24'
 params["seasonal_regulation"] = True
 
 
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
-params["only_opex_trading"]= False
+params["fix_infrastructure"]= False
 
 params["Constraint_tag"] = "Individual"
 
@@ -43,19 +43,19 @@ print("completed capex optimization run")
 # Operating cost only
 
 
-params["only_opex_trading"]= True
+params["fix_infrastructure"]= True
 
 # year when market is established
-## if market_year = 0; then market is established at time = 0
-## if market_year = 30; then market is established only at the end of the simulation
-market_years = np.linspace(0,30,31).astype(np.int64)
+## if unfix_infrastructure_year = 0; then joint infrastructure can start at time = 0
+## if unfix_infrastructure_year = 30; then no joint infrastructure can be built
+years = np.linspace(0,30,31).astype(np.int64)
 
 ## save the capex file path to read the capex results
 params['figpath_capex'] = params['figpath']  
 
 # loop over all years
-for year in market_years:
-    params["market_year"] = year
+for year in years:
+    params["unfix_infrastructure_year"] = year
     params["Constraint_tag"] = "Subembayment"
 
     ## create new figure path for opex optimization
@@ -69,6 +69,6 @@ for year in market_years:
 
     m.main()
 
-    print('completed opex optimization run for market year:', year)
+    print('completed opex optimization run for joint infrastructure developed in year:', year)
 
 print("completed opex optimization run for all years")
