@@ -1222,12 +1222,15 @@ class capacity_expansion():
                     B_start = Build_time[0]
                     B_end = Build_time[-1]
                     Schedule.loc[L + '_build'] = [L, B_start, B_end, 'Build']
+                else:
+                    Schedule.loc[L + '_build'] = [L, start_date, start_date, 'Build']
+                if len(Op_time) > 0:
                     Op_start = Op_time[0]
                     Op_end = Op_time[-1]
                     Schedule.loc[L + '_op'] = [L, Op_start, Op_end, 'Operate']
                 else:
-                    Schedule.loc[L + '_op'] = [L, start_date, start_date, 'Build']
                     Schedule.loc[L + '_op'] = [L, start_date, start_date, 'Operate']
+                    
             fig = px.timeline(Schedule, x_start="Start", x_end="Finish", y="Upgrade", color="Status", labels={"Upgrade": WWTP})
             fig.write_image(self.figpath + self.solver_type + '_'+ self.version_num + '_' + "schedule_" + str(WWTP)+ ".svg")
             plt.close()
