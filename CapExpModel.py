@@ -1109,40 +1109,40 @@ class capacity_expansion():
             fig.suptitle(plot_tag, fontsize=16)
             for L in model.L:
                 if plot_tag == 'eps':
-                    axs[i].plot(self.datetime, [model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'x':
-                    axs[i].plot(self.datetime, [model.x[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.x[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                 if plot_tag == 'x_eps':
-                    axs[i].plot(self.datetime, [model.x[WWTP,L,t]()*model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.x[WWTP,L,t]()*model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('TIN (lb N/day)', **hfont)
                 if plot_tag == 'x_status':
-                    axs[i].plot(self.datetime, [model.x[WWTP,L,t]()*model.status[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.x[WWTP,L,t]()*model.status[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('TIN (lb N/day)', **hfont)
                 if plot_tag == 'opex':
-                    axs[i].plot(self.datetime_years, [model.opex_yearly_NPV[WWTP,L,year]() for year in model.years], '-', color = colors[L],label = L) 
+                    axs[i].step(self.datetime_years, [model.opex_yearly_NPV[WWTP,L,year]() for year in model.years], '-', color = colors[L],label = L) 
                     if i == ciel:
                         axs[i].set_ylabel('Opex (NPV $mil/year)', **hfont)
                 if plot_tag == 'capex':
-                    axs[i].plot(self.datetime_years, [model.capex_yearly_NPV[WWTP,L,year]() for year in model.years], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime_years, [model.capex_yearly_NPV[WWTP,L,year]() for year in model.years], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Capex (mil $)', **hfont)
                 if plot_tag == 'u':
-                    axs[i].plot(self.datetime, [model.u[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.u[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'zeta':
-                    axs[i].plot(self.datetime, [model.zeta[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.zeta[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'z':
-                    axs[i].plot(self.datetime, [model.z[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.z[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'b':
-                    axs[i].plot(self.datetime, [model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'capacity':
-                    axs[i].plot(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Max TN Removal Capacity (lb N/day)', **hfont)
                 
@@ -1157,7 +1157,7 @@ class capacity_expansion():
                         if model.status[WWTP,L,t]() > 0:
                             conc[t] = (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                         SS_lim[t] = (model.dis[WWTP, t]() * (1- model.SS_rem_per[WWTP]()))/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
-                    axs[i].plot(self.datetime, conc, '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, conc, '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('Effluent TN Conc after upgrade (mg N/L)', **hfont)
                 
@@ -1172,14 +1172,14 @@ class capacity_expansion():
                             removal[t] = (model.x[WWTP,L,t]())/ model.dis[WWTP, t]() * 100
                         L2_lim[t] = (model.dis[WWTP,t]() - L2_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
                         L3_lim[t] = (model.dis[WWTP,t]() - L3_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
-                    axs[i].plot(self.datetime, removal, '-', color = colors[L],label = L)
+                    axs[i].step(self.datetime, removal, '-', color = colors[L],label = L)
                     axs[i].set_ylim(0, 100)
                     if i == ciel:
                         axs[i].set_ylabel('TN Removal (%)', **hfont)
                 
             
             if plot_tag == 'opex':
-                axs[i].plot(self.datetime_years, [sum(model.opex_yearly_NPV[WWTP,L,year]() for L in model.L) for year in model.years], '-', color = 'blue',label = 'Total Opex') 
+                axs[i].step(self.datetime_years, [sum(model.opex_yearly_NPV[WWTP,L,year]() for L in model.L) for year in model.years], '-', color = 'blue',label = 'Total Opex') 
 
             if plot_tag == 'capex':
                 # plot cumulative capex_yearly_NPV
@@ -1188,19 +1188,19 @@ class capacity_expansion():
                 for year in model.years:
                     cum_capex_value += sum(model.capex_yearly_NPV[WWTP,L,year]() for L in model.L)
                     cum_capex.append(cum_capex_value)
-                axs[i].plot(self.datetime_years, cum_capex, '-', color = 'blue',label = 'Cumulative capex')
+                axs[i].step(self.datetime_years, cum_capex, '-', color = 'blue',label = 'Cumulative capex')
             
             if plot_tag == 'conc':
                 if model.SS_rem_per[WWTP]() > 0:
-                    axs[i].plot(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS min conc')
-                axs[i].plot(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 min conc')
-                axs[i].plot(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 min conc')
+                    axs[i].step(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS min conc')
+                axs[i].step(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 min conc')
+                axs[i].step(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 min conc')
                 
             
             if plot_tag == 'removal':
-                axs[i].plot(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS max removal')
-                axs[i].plot(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 max removal')
-                axs[i].plot(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 max removal')
+                axs[i].step(self.datetime, SS_lim, '--', color = colors['SS'],label = 'SS max removal')
+                axs[i].step(self.datetime, L2_lim, '--', color = colors['L2'],label = 'L2 max removal')
+                axs[i].step(self.datetime, L3_lim, '--', color = colors['L3'],label = 'L3 max removal')
 
             if i == ciel:
                 axs[i].legend(loc='lower left')   
