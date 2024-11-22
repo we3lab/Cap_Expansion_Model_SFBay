@@ -84,11 +84,13 @@ class capacity_expansion():
         summary['Total_cost'] = [model.total_cost_WWTP[WWTP].value for WWTP in model.WWTP]
         summary['Total_capex'] = [sum(model.capex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Total_opex'] = [sum(model.opex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
-        summary['Max_capacity'] = [sum(model.x_max[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
+        summary['Max_capacity'] = [sum(model.u[WWTP,L,t].value for t in model.t) * sum(model.x_max[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
+        summary['Total_removal'] = [sum(model.r[WWTP,t].value for t in model.t) for WWTP in model.WWTP]
         for L in model.L:
             summary[L+'_capex_NPV'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_opex_NPV'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_removal'] = [sum(model.x[WWTP,L,t].value * model.status[WWTP,L,t].value for t in model.t) for WWTP in model.WWTP]
 
         summary.loc['Total'] = summary.sum()
         summary.to_csv(self.figpath_base +'summary.csv')
