@@ -1087,8 +1087,8 @@ class capacity_expansion():
         ax1.plot(self.datetime, [sum(model.dis_minus_reg[WWTP,t].value for WWTP in model.WWTP) for t in model.t] , '--', color='blue', label = 'Required TIN removal', alpha=0.5)
         
 
-        if self.seasonal_regulation:
-            ax1.set_ylim(-500, round(max([sum(model.dis_minus_reg[WWTP,t].value for WWTP in model.WWTP) for t in model.t])+100, -1))
+        #if self.seasonal_regulation:
+            #ax1.set_ylim(-500, round(max([sum(model.dis_minus_reg[WWTP,t].value for WWTP in model.WWTP) for t in model.t])+100, -1))
             
         plt.legend()
         plt.xlabel('Year', **hfont)
