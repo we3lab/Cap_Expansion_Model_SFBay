@@ -65,6 +65,7 @@ class capacity_expansion():
                         tee=True)
         
         print('Policy Scenario:', self.Constraint_tag)
+        print('Adaptive Infrastructure:', self.adaptive_infrastructure)
         print('Projected Discharge Multiplier:', self.projection_multiplier)
         print('Solver:', self.solver_type)
         print('Total NPV Cost = ', round(model.total_cost(),2), 'million')
@@ -384,6 +385,19 @@ class capacity_expansion():
                     model.eps[WWTP, L, :].fix(0)
                     model.u[WWTP, L, :].fix(0)
                     model.zeta[WWTP, L, :].fix(0)
+        
+        if not self.adaptive_infrastructure:
+            print('Adaptive infrastructure is not allowed')
+            # fix all integer variables to zero
+            model.u.fix(0)
+            # only unfix integer variables when the upgrade needs to be built
+            for WWTP in model.WWTP:
+                ## find when the upgrade needs to be operated (when discharge exceeds regulation)
+                t_operate = np.where(np.array(model.dis_minus_reg[WWTP,:]()) > 0)[0][0]
+                ## unfix upgrade for when the upgrade needs to be built
+                t_build = t_operate - 12 * self.time_to_build_yr 
+                model.u[WWTP,:,t_build].unfix()
+
         
         return model
 
