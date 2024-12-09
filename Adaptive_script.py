@@ -33,7 +33,7 @@ if not os.path.exists(params['figpath']):
 m = capacity_expansion(params)
 m.main()
 
-print("completed not adaptive and not coordinated optimization for run")
+print("completed adaptive and not coordinated optimization for run")
 
 
 
@@ -57,7 +57,7 @@ if not os.path.exists(params['figpath']):
 m = capacity_expansion(params)
 m.main()
 
-print("completed not adaptive and partially coordinated optimization for run")
+print("completed adaptive and partially coordinated optimization for run")
 
 
 # Case 5: Not adaptive, fully coordinated
@@ -80,4 +80,4 @@ if not os.path.exists(params['figpath']):
 m = capacity_expansion(params)
 m.main()
 
-print("completed not adaptive and fully coordinated optimization for run")
+print("completed adaptive and fully coordinated optimization for run")
