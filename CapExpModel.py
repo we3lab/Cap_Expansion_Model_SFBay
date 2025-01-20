@@ -420,6 +420,15 @@ class capacity_expansion():
                 t_build = t_operate - 12 * self.time_to_build_yr 
                 model.u[WWTP,:,t_build].unfix()
 
+
+            # Alternative where you can only build upgrade in the years before the new permit comes into effect
+            '''
+            for WWTP in model.WWTP:
+                for ind, mon in enumerate(self.datetime):
+                    if mon < pd.to_datetime(self.new_reg_year):
+                        model.u[WWTP,:,ind].unfix()    
+            ''' 
+
         
         return model
 
