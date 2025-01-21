@@ -661,25 +661,25 @@ class capacity_expansion():
             3) You can't operate L2.5 and L3 at the same time
         """
 
-        # Constraint that you can't operate L2 and L3 at the same time
-        def L2_L3_constraint(model, WWTP, t):
-            return model.eps[WWTP,'L3',t] <= 1 - model.eps[WWTP,'L2',t]
-        model.integer_constraint_L3 = Constraint(model.WWTP, model.t, rule=L2_L3_constraint)
+        # Constraint that you can't build L3 if L2 is already built (and vice-versa)
+        def L2_L3_constraint(model, WWTP):
+            return sum(model.u[WWTP,'L3',t] for t in model.t) <= 1 - sum(model.u[WWTP,'L2',t] for t in model.t)
+        model.integer_constraint_L3 = Constraint(model.WWTP, rule=L2_L3_constraint)
 
         # Constraint that you have to build L2 before upgrading to L2.5
-        def L2_L2pt5_constraint(model, WWTP, t):
-            return model.eps[WWTP,'L2pt5',t] <= model.eps[WWTP,'L2',t]
-        model.integer_constraint_L2pt5 = Constraint(model.WWTP, model.t, rule=L2_L2pt5_constraint)
+        def L2_L2pt5_constraint(model, WWTP):
+            return sum(model.u[WWTP,'L2pt5',t] for t in model.t) <= sum(model.u[WWTP,'L2',t] for t in model.t)
+        model.integer_constraint_L2pt5 = Constraint(model.WWTP, rule=L2_L2pt5_constraint)
 
         # Constraint that L2 has to operate at max capacity while operating L2.5
         def L2pt5_max_constraint(model, WWTP, t):
             return model.x[WWTP,'L2',t] >= model.status[WWTP,'L2pt5',t]* model.UB[WWTP, 'L2']
         model.integer_constraint_L2pt5_max = Constraint(model.WWTP, model.t, rule=L2pt5_max_constraint)
 
-        # Constraint that you can't operate L2.5 and L3 at the same time
-        def L2pt5_L3_constraint(model, WWTP, t):
-            return model.eps[WWTP,'L3',t] <= 1 - model.eps[WWTP,'L2pt5',t]
-        model.integer_constraint_L2pt5L3 = Constraint(model.WWTP, model.t, rule=L2pt5_L3_constraint)
+        # Constraint that you can't build L2.5 if L3 is already built
+        def L2pt5_L3_constraint(model, WWTP):
+            return sum(model.u[WWTP,'L3',t] for t in model.t) <= 1 - sum(model.u[WWTP,'L2pt5',t] for t in model.t)
+        model.integer_constraint_L2pt5L3 = Constraint(model.WWTP, rule=L2pt5_L3_constraint)
         
         return model
 
