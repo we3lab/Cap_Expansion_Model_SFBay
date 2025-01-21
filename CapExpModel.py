@@ -111,7 +111,6 @@ class capacity_expansion():
                 results[L+'_status'] = [model.status[WWTP,L,t].value for t in model.t]
                 results[L+'_x'] = [model.x[WWTP,L,t].value for t in model.t]
                 results [L + '_opex'] = [model.opex_monthly[WWTP,L,t].value for t in model.t]
-                results[L+'_eps'] = [model.eps[WWTP,L,t].value for t in model.t]
                 results[L+'_z'] = [model.z[WWTP,L,t].value for t in model.t]
                 results[L+'_b'] = [model.b[WWTP,L,t].value for t in model.t]
                 results[L+'_u'] = [model.u[WWTP,L,t].value for t in model.t]
@@ -150,7 +149,7 @@ class capacity_expansion():
         if self.update_figures:
             # Plot binary variables
             fig, ax = self.plot_regulations(model)
-            fig, ax = self.plot_subfigures(model, 'eps')
+            fig, ax = self.plot_subfigures(model, 'status')
             fig, ax = self.plot_subfigures(model, 'x')
             fig, ax = self.plot_subfigures(model, 'u')
             fig, ax = self.plot_subfigures(model, 'zeta')
@@ -358,15 +357,17 @@ class capacity_expansion():
         Add integer variable that determines if an upgrade is built
         """
 
-        model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines if an upgrade is operated')
+        
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade starts being built')
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade finishes being built')
         model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
+        model.op_start = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 at the exact time when an upgrade starts being operated and 0 otherwise')
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that determines when an upgrade is operated after built is completed')
+        
 
-        # Fix initial eps at 0
-        model.eps[:,:,0].fix(0)
+        # Fix initial z at 0
+        model.b[:,:,0].fix(0)
         model.u[:,:,0].fix(0)
         model.zeta[:,:,0].fix(0)
 
@@ -382,29 +383,29 @@ class capacity_expansion():
         
 
         if not self.include_L3:
-            model.eps[:,'L3',:].fix(0)
+            model.b[:,'L3',:].fix(0)
             model.u[:,'L3',:].fix(0)
             model.zeta[:,'L3',:].fix(0)
         
         if not self.include_L2:
-            model.eps[:,'L2',:].fix(0)
+            model.b[:,'L2',:].fix(0)
             model.u[:,'L2',:].fix(0)
             model.zeta[:,'L2',:].fix(0)
         
         if not self.include_L2pt5:
-            model.eps[:,'L2pt5',:].fix(0)
+            model.b[:,'L2pt5',:].fix(0)
             model.u[:,'L2pt5',:].fix(0)
             model.zeta[:,'L2pt5',:].fix(0)
         
         if not self.include_SS:
-            model.eps[:,'SS',:].fix(0)
+            model.b[:,'SS',:].fix(0)
             model.u[:,'SS',:].fix(0)
             model.zeta[:,'SS',:].fix(0)
 
         for WWTP in model.WWTP:
             for L in model.L:
                 if model.LB[WWTP, L].value == 0 and model.UB[WWTP, L].value == 0:
-                    model.eps[WWTP, L, :].fix(0)
+                    model.b[WWTP, L, :].fix(0)
                     model.u[WWTP, L, :].fix(0)
                     model.zeta[WWTP, L, :].fix(0)
         
@@ -502,7 +503,7 @@ class capacity_expansion():
             print('Fixing infrastructure to meet individual discharge limits')
             ind_end = len(self.datetime)
 
-        eps_fix = {}; z_fix = {}; b_fix = {}; u_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
+        z_fix = {}; b_fix = {}; u_fix = {}; op_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
         
         for WWTP in model.WWTP:
             try:
@@ -526,7 +527,7 @@ class capacity_expansion():
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize= b_fix, doc='Binary variable that is 1 from when the upgrade finishes being built')
         model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize= u_fix, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
         
-        model.eps = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines if an upgrade is operated')
+        model.op_start = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that is 1 at the exact time when an upgrade starts being operated and 0 otherwise')
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade is operated after built is completed')
         
@@ -721,10 +722,6 @@ class capacity_expansion():
         """
 
         
-        # Constraint that multiplies eps with (1-zeta) as effective status
-        def status_constraint(model, WWTP, L, t):
-            return model.status[WWTP,L,t] == model.eps[WWTP,L,t] * (1-model.zeta[WWTP,L,t])
-        
         
         # Constraint that total removal of WWTP at timestep (t) is the current capacity + added capacity
         def current_capacity(model, WWTP, t):
@@ -735,7 +732,6 @@ class capacity_expansion():
                     )
             )
         
-        model.status_constraint_cond = Constraint(model.WWTP, model.L, model.t, rule=status_constraint)
         model.current_capacity_cond = Constraint(model.WWTP, model.t, rule=current_capacity)
 
         return model
@@ -767,62 +763,60 @@ class capacity_expansion():
 
         self.time_to_build = 12 * self.time_to_build_yr
                 
-        # Constraint that u has to be greater than eps (1 when built)
-        def find_z(model, WWTP, L, t):
-            if t == 0:
-                return model.z[WWTP, L,t] == 0
+        # Constraint that finds b: when upgrade should be built
+        def find_b(model, WWTP, L, t):
+            if t < self.time_to_build:
+                return model.b[WWTP, L,t] == 0
             else:
-                # z is 1 if eps has switched to 1 at any time up to t
-                return model.z[WWTP, L, t] >= model.eps[WWTP, L, t]
+                # b is 1 if status has switched to 1 at any point
+                return model.b[WWTP, L, t] >= model.status[WWTP, L, t]
         
-        model.find_z = Constraint(model.WWTP, model.L, model.t, rule=find_z)
+        model.find_b = Constraint(model.WWTP, model.L, model.t, rule=find_b)
 
-        
-        def update_z(model, WWTP, L, t):
+        def update_b(model, WWTP, L, t):
             if t ==0:
-                return model.zeta[WWTP,L,t] == 0
+                return model.b[WWTP,L,t] == 0
             else:
-                # Once z is 1, it stays 1
-                return model.z[WWTP, L, t] >= model.z[WWTP, L, t-1]
+                # Once b is 1, it stays 1
+                return model.b[WWTP, L, t] >= model.b[WWTP, L, t-1]
         
-        model.update_z = Constraint(model.WWTP, model.L, model.t, rule=update_z)
+        model.update_b = Constraint(model.WWTP, model.L, model.t, rule=update_b)
 
-        def find_u(model, WWTP, L, t):
+        
+        # Upgrade starts operating (op_start = 1) when b switches to 1
+        def find_op_start(model, WWTP, L, t):
             if t == 0:
-                return model.u[WWTP, L,t] == 0
+                return model.op_start[WWTP, L,t] == 0
             else:
-                # u switches to 1 when z switches to 1
-                return model.u[WWTP, L, t] >= model.z[WWTP, L, t] - model.z[WWTP, L, t-1]
+                # op switches to 1 when b switches to 1
+                return model.op_start[WWTP, L, t] >= model.b[WWTP, L, t] - model.b[WWTP, L, t-1]
         
-        model.find_u = Constraint(model.WWTP, model.L, model.t, rule=find_u)
+        model.find_op_start = Constraint(model.WWTP, model.L, model.t, rule=find_op_start)
 
-
-        
-        # Constraint that u has to be always less than or equal to eps
-        def u_eps_const(model, WWTP, L, t):
-            return model.u[WWTP, L,t] <= model.eps[WWTP,L,t]
-        
-        model.u_eps_const = Constraint(model.WWTP, model.L, model.t, rule=u_eps_const)
-
-
-        #""" 
+        # Upgrade is build (u=1) at start of operation - time_to_build
         def time_to_build(model,WWTP,L,t):
+            # if t is less than the time to build, then the upgrade cannot be built
+            if t > len(self.datetime) - self.time_to_build - 1:
+                return model.u[WWTP,L,t] == 0
+            else:
+                return model.u[WWTP,L,t] >= model.op_start[WWTP,L,t + self.time_to_build]     
+
+        model.time_to_build = Constraint(model.WWTP, model.L, model.t, rule=time_to_build)
+        
+        # zeta is 1 while the upgrade is being built
+        def find_zeta(model,WWTP,L,t):
             if t < self.time_to_build:
                 return model.zeta[WWTP,L,t] == sum(model.u[WWTP,L,t-a] for a in range(t))
             else:
                 return model.zeta[WWTP,L,t] == sum(model.u[WWTP,L,t-a] for a in range(self.time_to_build))     
 
-        model.time_to_build = Constraint(model.WWTP, model.L, model.t, rule=time_to_build)
-        
-        #"""
-        
-        # Constraint to find when the upgrade is completed
-        # b is zero while upgrade is being built (i.e. model.zeta > 0)
-        def find_b(model, WWTP, L, t):
-            return model.b[WWTP, L, t] == model.z[WWTP, L, t] * (1 - model.zeta[WWTP, L, t])
-        
-        model.find_b = Constraint(model.WWTP, model.L, model.t, rule=find_b)
+        model.find_zeta = Constraint(model.WWTP, model.L, model.t, rule=find_zeta)
 
+        # z is one while upgrade is being built and operated
+        def find_z(model, WWTP, L, t):
+            return model.z[WWTP, L, t] == model.zeta[WWTP, L, t] + model.b[WWTP, L, t]
+        
+        model.find_z = Constraint(model.WWTP, model.L, model.t, rule=find_z)
 
         return model
     
@@ -1155,13 +1149,13 @@ class capacity_expansion():
         for i, WWTP in enumerate(model.WWTP):
             fig.suptitle(plot_tag, fontsize=16)
             for L in model.L:
-                if plot_tag == 'eps':
-                    axs[i].step(self.datetime, [model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                if plot_tag == 'status':
+                    axs[i].step(self.datetime, [model.status[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     axs[i].set_yticks([0,1])
                 if plot_tag == 'x':
                     axs[i].step(self.datetime, [model.x[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
-                if plot_tag == 'x_eps':
-                    axs[i].step(self.datetime, [model.x[WWTP,L,t]()*model.eps[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
+                if plot_tag == 'x_b':
+                    axs[i].step(self.datetime, [model.x[WWTP,L,t]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = L)
                     if i == ciel:
                         axs[i].set_ylabel('TIN (lb N/day)', **hfont)
                 if plot_tag == 'x_status':
