@@ -905,7 +905,7 @@ class capacity_expansion():
         #model.opex = Var(model.WWTP, model.L, model.t, initialize=0, bounds=(0, None))
         model.opex_monthly = Var(model.WWTP, model.L, model.t, initialize=0, bounds=(0, None))
         model.opex_yearly_NPV = Var(model.WWTP, model.L, model.t, initialize=0)
-        model.opex_NPV = Var(model.WWTP, model.L)
+        model.opex_NPV = Var(model.WWTP, model.L, initialize=0)
         
         def opex_monthly_cond(model, WWTP, L, t):
             if L == 'L2pt5':
