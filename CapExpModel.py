@@ -73,7 +73,7 @@ class capacity_expansion():
         for WWTP in model.WWTP:
             print('WWTP: ', WWTP, '(Total Cost:', round(model.total_cost_WWTP[WWTP](),2), 'million)')
             for L in model.L:
-                if sum(model.u[WWTP,L,t].value for t in model.t) == 1:
+                if round(sum(model.u[WWTP,L,t].value for t in model.t)) == 1:
                     #print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Lower bound (' + str(model.LB[WWTP, L].value)+ '); Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
                     print('\t',L+':', round(model.x_max[WWTP,L](),2), '(' + str(round(max(model.x[WWTP,L,t].value for t in model.t),1)) + ')',
                           '; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
@@ -85,7 +85,7 @@ class capacity_expansion():
         summary['Total_cost'] = [model.total_cost_WWTP[WWTP].value for WWTP in model.WWTP]
         summary['Total_capex'] = [sum(model.capex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Total_opex'] = [sum(model.opex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
-        summary['Max_capacity'] = [sum(sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
+        summary['Max_capacity'] = [sum(sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for L in model.L) - model.x_max[WWTP, 'L2'].value * sum(model.u[WWTP,'L2pt5',t].value for t in model.t) for WWTP in model.WWTP]
         summary['Total_removal'] = [sum(model.r[WWTP,t].value for t in model.t) for WWTP in model.WWTP]
         for L in model.L:
             summary[L+'_capex_NPV'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
@@ -313,7 +313,7 @@ class capacity_expansion():
         model.x = Var(model.WWTP, model.L, model.t, bounds=fb, initialize=x_init)    # total nitrogen removed by each facility at each timestep
 
         model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Mmaximum nitrogen removed by each facility by each upgrade
-
+        
         model.r = Var(model.WWTP, model.t, initialize=0)                      # total nitrogen removed by each facility at each timestep
 
         return model
@@ -667,15 +667,26 @@ class capacity_expansion():
             return sum(model.u[WWTP,'L3',t] for t in model.t) <= 1 - sum(model.u[WWTP,'L2',t] for t in model.t)
         model.integer_constraint_L3 = Constraint(model.WWTP, rule=L2_L3_constraint)
 
-        # Constraint that you have to operate L2 before upgrading to L2.5
+        # Constraint that you have to build L2 if you want to build L2pt5
+        def L2_L2pt5_build_constraint(model, WWTP):
+            return sum(model.u[WWTP,'L2pt5',t] for t in model.t) <= sum(model.u[WWTP,'L2',t] for t in model.t)
+        model.integer_constraint_L2pt5_build = Constraint(model.WWTP, rule=L2_L2pt5_build_constraint)
+
+        # Constraint that you cannot operate L2 when operating to L2.5
         def L2_L2pt5_constraint(model, WWTP, t):
-            return model.status[WWTP,'L2pt5',t]  <= model.status[WWTP,'L2',t]
+            return model.status[WWTP,'L2pt5',t]  <= 1- model.status[WWTP,'L2',t]
         model.integer_constraint_L2pt5 = Constraint(model.WWTP, model.t, rule=L2_L2pt5_constraint)
 
-        # Constraint that L2 has to operate at max capacity while operating L2.5
-        def L2pt5_max_constraint(model, WWTP, t):
-            return model.x[WWTP,'L2',t] >= model.status[WWTP,'L2pt5',t]* model.UB_max[WWTP, 'L2']
-        #model.integer_constraint_L2pt5_max = Constraint(model.WWTP, model.t, rule=L2pt5_max_constraint)
+        # Constraint that you have to build L2 before building L2.5
+        def L2_L2pt5_operate_constraint(model, WWTP, t):
+            return model.z[WWTP,'L2pt5',t]  <= model.z[WWTP,'L2',t]
+        model.integer_constraint_L2pt5_operate = Constraint(model.WWTP, model.t, rule=L2_L2pt5_operate_constraint)
+
+        # Constraint that L2 has to operate at max capacity before operating L2.5
+        def L2pt5_max_constraint(model, WWTP):
+            return model.x_max[WWTP,'L2'] >= sum(model.u[WWTP,'L2pt5',t] for t in model.t) * model.UB_max[WWTP, 'L2']
+        model.integer_constraint_L2pt5_max = Constraint(model.WWTP, rule=L2pt5_max_constraint)
+        
 
         # Constraint that you can't build L2.5 if L3 is already built
         def L2pt5_L3_constraint(model, WWTP):
@@ -696,7 +707,7 @@ class capacity_expansion():
         def L2_bound_constraint(model, WWTP, t):
             return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t]  <= model.L2_bound[WWTP,t]
             
-        #model.L2_upper_bound = Constraint(model.WWTP, model.t, rule=L2_bound_constraint)
+        model.L2_upper_bound = Constraint(model.WWTP, model.t, rule=L2_bound_constraint)
 
         # Constraint that L3 can only operate to produce 6 mg/L of TN
         def L3_bound_constraint(model, WWTP, t):
@@ -706,9 +717,9 @@ class capacity_expansion():
 
         # Constraint that L2 upgraded to L2.5 can only operate to produce 6 mg/L of TN
         def L2pt5_bound_constraint(model, WWTP, t):
-            return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t] + model.x[WWTP,'L2pt5',t]*model.status[WWTP,'L2pt5',t]  <= model.L3_bound[WWTP,t]
+            return model.x[WWTP,'L2pt5',t] * model.status[WWTP,'L2pt5',t]  <= model.L3_bound[WWTP,t]
         
-        #model.L2pt5_upper_bound = Constraint(model.WWTP, model.t, rule=L2pt5_bound_constraint)
+        model.L2pt5_upper_bound = Constraint(model.WWTP, model.t, rule=L2pt5_bound_constraint)
         
         return model
     
@@ -836,7 +847,7 @@ class capacity_expansion():
         def non_operational_x(model, WWTP, L, t):
             return model.x[WWTP, L, t] * (1 - model.status[WWTP, L, t]) <= model.LB[WWTP, L] 
 
-        
+    
         model.max_capacity = Constraint(model.WWTP, model.L, model.t, rule=max_capacity)
         model.non_operational_x_cond = Constraint(model.WWTP, model.L, model.t, rule=non_operational_x)
 
@@ -887,11 +898,10 @@ class capacity_expansion():
         ## Add data for L2pt5
         for i in df.index:
             for j in [0,1]:
-                df.loc[i, self.opex_L2pt5_tag[j]] = df.loc[i, self.opex_L3_tag[j]] - df.loc[i, self.opex_L2_tag[j]]
-                df.loc[i, self.capex_L2pt5_tag[j]] = df.loc[i, self.capex_L3_tag[j]] - df.loc[i, self.capex_L2_tag[j]]
-            df.loc[i, self.bounds_L2pt5_tag[1]] = df.loc[i, self.bounds_L3_tag[1]] - df.loc[i, self.bounds_L2_tag[1]]               # upper bound for L2.5
-            df.loc[i, self.bounds_L2pt5_max_tag[0]] = df.loc[i, self.bounds_L3_max_tag[0]] - df.loc[i, self.bounds_L2_max_tag[1]]   # lower bound max for L2.5
-            df.loc[i, self.bounds_L2pt5_max_tag[1]] = df.loc[i, self.bounds_L3_max_tag[1]] - df.loc[i, self.bounds_L2_max_tag[1]]   # upper bound max for L2.5
+                df.loc[i, self.opex_L2pt5_tag[j]] = df.loc[i, self.opex_L3_tag[j]]
+                df.loc[i, self.capex_L2pt5_tag[j]] = df.loc[i, self.capex_L3_tag[j]]
+                df.loc[i, self.bounds_L2pt5_tag[j]] = df.loc[i, self.bounds_L3_tag[j]]                                      
+                df.loc[i, self.bounds_L2pt5_max_tag[j]] = df.loc[i, self.bounds_L3_max_tag[j]]                              
         return df
     
     
@@ -908,17 +918,11 @@ class capacity_expansion():
         model.opex_NPV = Var(model.WWTP, model.L, initialize=0)
         
         def opex_monthly_cond(model, WWTP, L, t):
-            if L == 'L2pt5':
-                return model.opex_monthly[WWTP, 'L2pt5',t] == (
-                    model.status[WWTP,'L2pt5',t] * 
-                    (model.A[WWTP,'L2pt5'] * model.x[WWTP,'L2',t] + model.A[WWTP,'L3']* model.x[WWTP, 'L2pt5',t] + model.B[WWTP,'L2pt5'])
-                    )
-            else:
-                return model.opex_monthly[WWTP, L,t] == (
-                    model.status[WWTP,L,t] * 
-                    (model.A[WWTP,L] * model.x[WWTP,L,t] + model.B[WWTP,L])
-                    )
-        
+            return model.opex_monthly[WWTP, L,t] == (
+                model.status[WWTP,L,t] * 
+                (model.A[WWTP,L] * model.x[WWTP,L,t] + model.B[WWTP,L])
+                )
+    
         def opex_yearly_NPV_cond(model, WWTP, L, years):
             
             year = self.datetime_years[years].year
@@ -958,7 +962,8 @@ class capacity_expansion():
             if L == 'L2pt5':
                 return model.capex_monthly[WWTP, 'L2pt5',t] == (
                     model.u[WWTP,'L2pt5',t] * 
-                    (model.D[WWTP,'L2pt5'] * model.x_max[WWTP,'L2'] + model.D[WWTP,'L3']* model.x_max[WWTP, 'L2pt5'] + model.E[WWTP,'L2pt5'])
+                    ((model.D[WWTP,'L2pt5'] * model.x_max[WWTP,'L2pt5'] + model.E[WWTP,'L2pt5']) - 
+                    (model.D[WWTP,'L2'] * model.x_max[WWTP,'L2'] + model.E[WWTP,'L2']))
                     )
             else:
                 return model.capex_monthly[WWTP, L, t] == (
@@ -1082,17 +1087,17 @@ class capacity_expansion():
             
             if plot_tag == 'removed':
                 for L in model.L:
-                    if sum(model.u[WWTP,L,t]() for t in model.t) == 1:
+                    if round(sum(model.u[WWTP,L,t].value for t in model.t)) == 1:
                         ax1.plot(self.datetime, [model.x[WWTP,L,t]()*model.status[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = 'Quantity removed with ' + L)
                     plt.ylabel('TIN removed (lb N/day)', **hfont)
                 ax1.plot(self.datetime, [model.r[WWTP,t]() for t in model.t], '-', color='orange', label = 'Total quantity removed')
 
             if plot_tag == 'capacity':
                 for L in model.L:
-                    if sum(model.u[WWTP,L,t]() for t in model.t) == 1:
+                    if round(sum(model.u[WWTP,L,t].value for t in model.t)) == 1:
                         ax1.plot(self.datetime, [model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for t in model.t], '-', color = colors[L],label = 'Removal capacity of ' + L)
                     plt.ylabel('TIN removal capacity (lb N/day)', **hfont)
-                ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L) for t in model.t], '-', color='orange', label = 'Total capacity')
+                ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L) - model.x_max[WWTP, 'L2'].value * model.b[WWTP,'L2pt5',t].value for t in model.t], '-', color='orange', label = 'Total capacity')
 
             
             ax1.plot(self.datetime, [value(model.dis_minus_reg[WWTP,t]) for t in model.t],  '--', color='blue', label = 'Required TIN removal', alpha=0.5)
@@ -1121,8 +1126,8 @@ class capacity_expansion():
         
         if plot_tag == 'capacity':
             for i, WWTP in enumerate(model.WWTP):
-                ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L) for t in model.t], '-', color=colors[i] , label = WWTP)
-            ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L for WWTP in model.WWTP) for t in model.t], '-', color='orange', label = 'Total removal capacity')
+                ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L) - model.x_max[WWTP, 'L2'].value * model.b[WWTP,'L2pt5',t].value for t in model.t], '-', color=colors[i] , label = WWTP)
+            ax1.plot(self.datetime, [sum(model.x_max[WWTP,L]()*model.b[WWTP,L,t]() for L in model.L for WWTP in model.WWTP) - sum(model.x_max[WWTP, 'L2'].value * model.b[WWTP,'L2pt5',t].value for WWTP in model.WWTP) for t in model.t], '-', color='orange', label = 'Total removal capacity')
             plt.ylabel('TIN removal capacity (lb N/day)', **hfont)
         
         ax1.plot(self.datetime, [sum(model.dis_minus_reg[WWTP,t].value for WWTP in model.WWTP) for t in model.t] , '--', color='blue', label = 'Required TIN removal', alpha=0.5)
@@ -1195,8 +1200,7 @@ class capacity_expansion():
                     SS_lim = np.zeros(len(model.t))
 
                     for t in model.t:
-                        if model.status[WWTP,L,t]() > 0:
-                            conc[t] = (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
+                        conc[t] = model.status[WWTP,L,t]() * (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                         SS_lim[t] = (model.dis[WWTP, t]() * (1- model.SS_rem_per[WWTP]()))/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                     axs[i].step(self.datetime, conc, '-', color = colors[L],label = L)
                     if i == ciel:
@@ -1209,8 +1213,7 @@ class capacity_expansion():
                     L2_lim = np.ones(len(model.t)) * 15
                     L3_lim = np.ones(len(model.t)) * 6
                     for t in model.t:
-                        if model.status[WWTP,L,t]() > 0:
-                            removal[t] = (model.x[WWTP,L,t]())/ model.dis[WWTP, t]() * 100
+                        removal[t] = (model.x[WWTP,L,t]()*model.status[WWTP,L,t]())/ model.dis[WWTP, t]() * 100
                         L2_lim[t] = (model.dis[WWTP,t]() - L2_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
                         L3_lim[t] = (model.dis[WWTP,t]() - L3_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
                     axs[i].step(self.datetime, removal, '-', color = colors[L],label = L)
