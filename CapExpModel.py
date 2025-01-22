@@ -667,15 +667,15 @@ class capacity_expansion():
             return sum(model.u[WWTP,'L3',t] for t in model.t) <= 1 - sum(model.u[WWTP,'L2',t] for t in model.t)
         model.integer_constraint_L3 = Constraint(model.WWTP, rule=L2_L3_constraint)
 
-        # Constraint that you have to build L2 before upgrading to L2.5
-        def L2_L2pt5_constraint(model, WWTP):
-            return sum(model.u[WWTP,'L2pt5',t] for t in model.t) <= sum(model.u[WWTP,'L2',t] for t in model.t)
-        model.integer_constraint_L2pt5 = Constraint(model.WWTP, rule=L2_L2pt5_constraint)
+        # Constraint that you have to operate L2 before upgrading to L2.5
+        def L2_L2pt5_constraint(model, WWTP, t):
+            return model.status[WWTP,'L2pt5',t]  <= model.status[WWTP,'L2',t]
+        model.integer_constraint_L2pt5 = Constraint(model.WWTP, model.t, rule=L2_L2pt5_constraint)
 
         # Constraint that L2 has to operate at max capacity while operating L2.5
         def L2pt5_max_constraint(model, WWTP, t):
-            return model.x[WWTP,'L2',t] >= model.status[WWTP,'L2pt5',t]* model.UB[WWTP, 'L2']
-        model.integer_constraint_L2pt5_max = Constraint(model.WWTP, model.t, rule=L2pt5_max_constraint)
+            return model.x[WWTP,'L2',t] >= model.status[WWTP,'L2pt5',t]* model.UB_max[WWTP, 'L2']
+        #model.integer_constraint_L2pt5_max = Constraint(model.WWTP, model.t, rule=L2pt5_max_constraint)
 
         # Constraint that you can't build L2.5 if L3 is already built
         def L2pt5_L3_constraint(model, WWTP):
@@ -696,7 +696,7 @@ class capacity_expansion():
         def L2_bound_constraint(model, WWTP, t):
             return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t]  <= model.L2_bound[WWTP,t]
             
-        model.L2_upper_bound = Constraint(model.WWTP, model.t, rule=L2_bound_constraint)
+        #model.L2_upper_bound = Constraint(model.WWTP, model.t, rule=L2_bound_constraint)
 
         # Constraint that L3 can only operate to produce 6 mg/L of TN
         def L3_bound_constraint(model, WWTP, t):
@@ -708,7 +708,7 @@ class capacity_expansion():
         def L2pt5_bound_constraint(model, WWTP, t):
             return model.x[WWTP,'L2',t]*model.status[WWTP,'L2',t] + model.x[WWTP,'L2pt5',t]*model.status[WWTP,'L2pt5',t]  <= model.L3_bound[WWTP,t]
         
-        model.L2pt5_upper_bound = Constraint(model.WWTP, model.t, rule=L2pt5_bound_constraint)
+        #model.L2pt5_upper_bound = Constraint(model.WWTP, model.t, rule=L2pt5_bound_constraint)
         
         return model
     
@@ -887,11 +887,11 @@ class capacity_expansion():
         ## Add data for L2pt5
         for i in df.index:
             for j in [0,1]:
-                df[self.opex_L2pt5_tag[j]] = df[self.opex_L3_tag[j]] - df[self.opex_L2_tag[j]]
-                df[self.capex_L2pt5_tag[j]] = df[self.capex_L3_tag[j]] - df[self.capex_L2_tag[j]]
-                df[self.bounds_L2pt5_tag[j]] = df[self.bounds_L3_tag[j]] - df[self.bounds_L2_tag[j]]
-                df[self.bounds_L2pt5_max_tag[j]] = df[self.bounds_L3_max_tag[j]] - df[self.bounds_L2_max_tag[j]]
-        
+                df.loc[i, self.opex_L2pt5_tag[j]] = df.loc[i, self.opex_L3_tag[j]] - df.loc[i, self.opex_L2_tag[j]]
+                df.loc[i, self.capex_L2pt5_tag[j]] = df.loc[i, self.capex_L3_tag[j]] - df.loc[i, self.capex_L2_tag[j]]
+            df.loc[i, self.bounds_L2pt5_tag[1]] = df.loc[i, self.bounds_L3_tag[1]] - df.loc[i, self.bounds_L2_tag[1]]               # upper bound for L2.5
+            df.loc[i, self.bounds_L2pt5_max_tag[0]] = df.loc[i, self.bounds_L3_max_tag[0]] - df.loc[i, self.bounds_L2_max_tag[1]]   # lower bound max for L2.5
+            df.loc[i, self.bounds_L2pt5_max_tag[1]] = df.loc[i, self.bounds_L3_max_tag[1]] - df.loc[i, self.bounds_L2_max_tag[1]]   # upper bound max for L2.5
         return df
     
     
