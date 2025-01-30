@@ -107,7 +107,8 @@ class capacity_expansion():
             results['Total_removal'] = [model.r[WWTP,t].value for t in model.t]
             for L in model.L:                
                 results[L+'_r'] = [model.status[WWTP,L,t].value * model.x[WWTP,L,t].value for t in model.t]
-                results[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for t in model.t]
+                results[L+'_x_max'] = [model.x_max[WWTP,L].value for t in model.t]
+                results[L+'_x_max_u'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for t in model.t]
                 results[L+'_status'] = [model.status[WWTP,L,t].value for t in model.t]
                 results[L+'_x'] = [model.x[WWTP,L,t].value for t in model.t]
                 results [L + '_opex'] = [model.opex_monthly[WWTP,L,t].value for t in model.t]
@@ -312,7 +313,8 @@ class capacity_expansion():
 
         model.x = Var(model.WWTP, model.L, model.t, bounds=fb, initialize=x_init)    # total nitrogen removed by each facility at each timestep
 
-        model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Mmaximum nitrogen removed by each facility by each upgrade
+        if self.Constraint_tag == 'No_coordination':
+            model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Maximum nitrogen removed by each facility by each upgrade
         
         model.r = Var(model.WWTP, model.t, initialize=0)                      # total nitrogen removed by each facility at each timestep
 
@@ -521,6 +523,7 @@ class capacity_expansion():
             z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
             b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
             u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
+            x_max_fix = {**x_max_fix, **{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
 
         
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize= z_fix, doc='Binary variable that is 1 from when the upgrade starts being built')
@@ -531,12 +534,16 @@ class capacity_expansion():
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade is operated after built is completed')
         
-
+        # For x_max need to redefine x_max
+        def fb_max(model, WWTP, L):
+            return (model.LB_max[WWTP, L], model.UB_max[WWTP, L])
+        model.x_max = Var(model.WWTP, model.L, initialize= x_max_fix, bounds=fb_max, doc='Maximum nitrogen removed by each facility by each upgrade')
 
         for t in range(0, ind_end + 1):
             model.z[:,:,t].fix()
             model.b[:,:,t].fix()
             model.u[:,:,t].fix()
+            model.x_max[:,:].fix()
         
         # does not allow building certain upgrades if they are not included in the model
         # fixes SS upgrade at 0 if it is not an option for a WWTP
