@@ -7,10 +7,20 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath)     
 params = json.load(open(fp))
 
-params["version_num"] = 'Joint_infrastructure_loop_over_23Nov24'
+params["version_num"] = 'Joint_infrastructure_loop_over_30Jan25'
+
+
+# Adaptive infrastructure
+params["adaptive_infrastructure"]= True
+
+# Set other parameters
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
+
+
+
+# Case 1: Staged, not coordinated
 params["Constraint_tag"] = 'No_coordination'
 
 # Optimize for infrastructure
@@ -22,13 +32,8 @@ params["trading_market"] = False                     # true if trading market is
 # Sensitivity 
 params["projection_multiplier"] = 1.0
 
-if params["seasonal_regulation"]:
-    file_tag = "Seasonal/"
-else:
-    file_tag = "Year_round/"
-
-params['figpath'] = 'Figures/' + params['version_num'] +  "/" + file_tag + "capex_opt/" 
-params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + file_tag + "capex_opt_" 
+params['figpath'] = 'Figures/' + params['version_num'] +  "/capex_opt/" 
+params['figpath_base'] = 'Figures/' + params['version_num'] + "/capex_opt_" 
 
 if not os.path.exists(params['figpath']):
     os.makedirs(params['figpath'])
@@ -42,13 +47,12 @@ print("completed capex optimization run")
 
 
 
-# Market is always allowed
+# Market is allowed at the same year as joint-infrastructure start year
 # Joint-infrastructure is allowed to start at different years
 
 # Allow for both joint-infrastructure and trading 
 
 params["joint_infrastructure"]= True
-params["trading_market_year"] = 0          # Year when joint_infrastructure planning can start
 params["trading_market"] = True                  # true if trading market is allowed
 params["Constraint_tag"] = 'Full_coordination'
 
@@ -62,11 +66,12 @@ params['figpath_capex'] = params['figpath']
 
 # loop over all years
 for year in years:
-    params["unfix_infrastructure_year"] = year
+    params["unfix_infrastructure_year"] = year  # Year when joint_infrastructure planning can start
+    params["trading_market_year"] = year        # Trading market starts when joint_infrastructure starts
 
-    ## create new figure path for opex optimization
-    params['figpath'] = 'Figures/' + params['version_num'] +  "/" + file_tag + "opex_opt/" + str(year) + "/" 
-    params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + file_tag + "opex_opt_"  + str(year) + "_" 
+    ## create new figure path for capex optimization
+    params['figpath'] = 'Figures/' + params['version_num'] +  "/capex_opt/" + str(year) + "/" 
+    params['figpath_base'] = 'Figures/' + params['version_num'] + "/capex_opt_"  + str(year) + "_" 
 
     if not os.path.exists(params['figpath']):
         os.makedirs(params['figpath'])
@@ -77,4 +82,4 @@ for year in years:
 
     print('completed optimization run for joint-infrastructure planning established in year:', year)
 
-print("completed opex optimization run for all years")
+print("completed optimization run for all years")
