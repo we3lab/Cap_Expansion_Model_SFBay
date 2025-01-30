@@ -7,10 +7,13 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath)     
 params = json.load(open(fp))
 
-params["version_num"] = 'Sensitivity_all_coordination_21Nov24'
+params["adaptive_infrastructure"]= False
+
+params["version_num"] = 'Sensitivity_all_coordination_NS_29Jan25'
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = True
 params["update_figures"] = False
+
 
 projection_multipliers = np.linspace(0.8, 1.1, 31)
 
