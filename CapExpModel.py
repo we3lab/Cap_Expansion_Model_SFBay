@@ -543,7 +543,11 @@ class capacity_expansion():
             model.z[:,:,t].fix()
             model.b[:,:,t].fix()
             model.u[:,:,t].fix()
-            model.x_max[:,:].fix()
+            # only fix x_max of upgrades that are already built
+            for WWTP in model.WWTP:
+                for L in model.L:
+                    if z_fix[WWTP,L,t]:
+                        model.x_max[WWTP,L].fix()
         
         # does not allow building certain upgrades if they are not included in the model
         # fixes SS upgrade at 0 if it is not an option for a WWTP
