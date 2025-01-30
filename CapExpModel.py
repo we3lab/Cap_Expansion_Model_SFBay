@@ -679,6 +679,11 @@ class capacity_expansion():
             return sum(model.u[WWTP,'L2pt5',t] for t in model.t) <= sum(model.u[WWTP,'L2',t] for t in model.t)
         model.integer_constraint_L2pt5_build = Constraint(model.WWTP, rule=L2_L2pt5_build_constraint)
 
+        # Constraint that you cannot build L2.5 while L2 is being built
+        def L2_L2pt5_build_constraint_2(model, WWTP, t):
+            return model.zeta[WWTP,'L2pt5',t]  <= 1 - model.zeta[WWTP,'L2',t]
+        model.integer_constraint_L2pt5_build_2 = Constraint(model.WWTP, model.t, rule=L2_L2pt5_build_constraint_2)
+
         # Constraint that you cannot operate L2 when operating to L2.5
         def L2_L2pt5_constraint(model, WWTP, t):
             return model.status[WWTP,'L2pt5',t]  <= 1- model.status[WWTP,'L2',t]
