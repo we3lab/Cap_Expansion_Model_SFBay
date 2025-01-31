@@ -453,12 +453,12 @@ class capacity_expansion():
             year = self.datetime_years[self.trading_market_year].year 
             ind_end = np.where(self.datetime.year == year)[0][-1] - len(self.datetime.year[self.datetime.year == year])
             print('Trading market starts in year:', self.trading_market_year)
-            '''
+            #'''
             print('year:', year) 
             print('ind_end:', ind_end)
             print('date at end index:', self.datetime[ind_end])
             print('t at end index:', model.t[ind_end])
-            '''
+            #'''
         except: 
             print('Assuming trading market is never established')
             print('Requiring all infrastructure to meet their own individual permits')
@@ -498,7 +498,13 @@ class capacity_expansion():
                 print('Fixing infrastructure that meets individual discharge limits')
                 ind_end = len(self.datetime)
             else:
-                print('Joint infrastructure planning starts at year:', self.unfix_infrastructure_year)   
+                print('Joint infrastructure planning starts at year:', self.unfix_infrastructure_year)
+            '''
+            print('year:', year) 
+            print('ind_end:', ind_end)
+            print('date at end index:', self.datetime[ind_end])
+            print('t at end index:', model.t[ind_end])
+            '''   
 
         except: 
             print('Assuming joint infrastructure is never established')
@@ -539,7 +545,7 @@ class capacity_expansion():
             return (model.LB_max[WWTP, L], model.UB_max[WWTP, L])
         model.x_max = Var(model.WWTP, model.L, initialize= x_max_fix, bounds=fb_max, doc='Maximum nitrogen removed by each facility by each upgrade')
 
-        for t in range(0, ind_end + 1):
+        for t in range(0, ind_end-1):
             model.z[:,:,t].fix()
             model.b[:,:,t].fix()
             model.u[:,:,t].fix()
