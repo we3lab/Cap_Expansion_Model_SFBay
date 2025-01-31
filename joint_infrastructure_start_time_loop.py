@@ -59,7 +59,7 @@ params["Constraint_tag"] = 'Full_coordination'
 # year when market is established
 ## if trading_market_year = 0; then nutrient credits can be traded at time = 0
 ## if trading_market_year = 30; then nutrient credits cannot be traded for the duration of the simulation
-years = np.linspace(0,30,31).astype(np.int64)
+years = np.linspace(0,29,30).astype(np.int64)
 
 ## save the capex file path to read the capex results
 params['figpath_capex'] = params['figpath']  
