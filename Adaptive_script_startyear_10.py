@@ -7,7 +7,7 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath) 
 params = json.load(open(fp))
 
-year = 20
+year = 29
 
 # Initialize parameters
 params["version_num"] = 'Adaptive_' + str(year) + 'yr_30Jan25'
@@ -22,7 +22,6 @@ params["adaptive_infrastructure"]= True
 # Set other parameters
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
-
 
 
 
@@ -41,12 +40,12 @@ if not os.path.exists(params['figpath']):
         os.makedirs(params['figpath'])
 
 m = capacity_expansion(params)
-m.main()
+#m.main()
 
 print("completed adaptive and not coordinated optimization for run")
 
-
 # Case 4: Staged, partially coordinated
+#'''
 params["update_figures"] = False
 params['Constraint_tag'] = 'Partial_coordination'
 
@@ -57,7 +56,6 @@ params["trading_market"] = True
 
     ## save the capex file path to read the capex results
 params['figpath_capex'] = params['figpath']  
-
 params['figpath'] = 'Figures/' + params['version_num'] +  "/" + params["Constraint_tag"] + "/" 
 params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params["Constraint_tag"] + "_" 
 
@@ -68,11 +66,12 @@ m = capacity_expansion(params)
 m.main()
 
 print("completed adaptive and partially coordinated optimization for run")
+#'''
 
-
+'''
 # Case 6: Staged, fully coordinated
 params['Constraint_tag'] = 'Full_coordination'
-params["update_figures"] = False
+params["update_figures"] = True
 
     ## Allow for only trading markets
 params["joint_infrastructure"]= True
@@ -92,3 +91,4 @@ m = capacity_expansion(params)
 m.main()
 
 print("completed adaptive and fully coordinated optimization for run")
+'''
