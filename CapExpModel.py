@@ -360,7 +360,7 @@ class capacity_expansion():
         """
 
         
-        model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade starts being built')
+        model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 when the upgrade is being built and operated')
         model.b = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 from when the upgrade finishes being built')
         model.u = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 at the exact time when an upgrade starts being built and 0 otherwise')
         model.op_start = Var(model.WWTP, model.L, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 at the exact time when an upgrade starts being operated and 0 otherwise')
@@ -511,8 +511,19 @@ class capacity_expansion():
             print('Fixing infrastructure to meet individual discharge limits')
             ind_end = len(self.datetime)
 
-        z_fix = {}; b_fix = {}; u_fix = {}; op_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
         
+        
+        # For x_max we need to redefine x_max
+        def fb_max(model, WWTP, L):
+            return (model.LB_max[WWTP, L], model.UB_max[WWTP, L])
+        
+        def x_max_init(model, WWTP, L):
+            return model.LB_max[WWTP, L]
+        
+        
+        # Fix all upgrades before start year
+        z_fix = {}; b_fix = {}; u_fix = {}; op_fix = {}; zeta_fix = {}; status_fix = {}; x_max_fix = {}
+
         for WWTP in model.WWTP:
             try:
                 path = self.figpath_capex +'results_'+ WWTP +'.csv'
@@ -521,6 +532,9 @@ class capacity_expansion():
                     raise SystemExit('Cannot find data for prior infrastructure investments to run Partial Coordination model')
                 print('Cannot find data for prior infrastructure investments')
                 print('Running MILP model with all infrastructure unfixed')
+                
+                # redefine x_max
+                model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Maximum nitrogen removed by each facility by each upgrade
                 model = self.add_integer_variables(model)
                 model = self.set_integer_variables(model)
                 return model
@@ -539,10 +553,6 @@ class capacity_expansion():
         model.op_start = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that is 1 at the exact time when an upgrade starts being operated and 0 otherwise')
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade is operated after built is completed')
-        
-        # For x_max need to redefine x_max
-        def fb_max(model, WWTP, L):
-            return (model.LB_max[WWTP, L], model.UB_max[WWTP, L])
         model.x_max = Var(model.WWTP, model.L, initialize= x_max_fix, bounds=fb_max, doc='Maximum nitrogen removed by each facility by each upgrade')
 
         for t in range(0, ind_end-1):
