@@ -8,11 +8,13 @@ fp = os.path.join(os.getcwd(),basepath)
 params = json.load(open(fp))
 
 # Initialize parameters
-params["version_num"] = 'Not_adaptive_06Dec24'
+params["version_num"] = 'Not_adaptive_11Jun25'
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
-    # Not adaptive infrastructure
+params["marginal_cost_analysis"] = False
+
+# Not adaptive infrastructure
 params["adaptive_infrastructure"]= False
 
 

@@ -181,6 +181,14 @@ class capacity_expansion():
 
         
 
+        if self.marginal_cost_analysis and self.Constraint_tag == 'Partial_coordination':
+            #print('Computing marginal costs')
+            # Compute marginal costs
+            #model = self.compute_marginal_costs(model, solver)
+            print('Computing unit costs')
+            #model = self.compute_unit_costs(model, solver)
+            model = self.compute_unit_costs_WWTP(model, solver)
+        
         return model
     
 
@@ -543,7 +551,7 @@ class capacity_expansion():
             z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
             b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
             u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
-            x_max_fix = {**x_max_fix, **{(WWTP, L): int(df.loc[0, L+'_x_max']) for L in model.L}}
+            x_max_fix = {**x_max_fix, **{(WWTP, L): float(df.loc[0, L+'_x_max']) for L in model.L}}
 
         
         model.z = Var(model.WWTP, model.L, model.t, within=Binary, initialize= z_fix, doc='Binary variable that is 1 from when the upgrade starts being built')
@@ -1312,6 +1320,697 @@ class capacity_expansion():
             plt.close()
             #fig.show()
         return fig
+    
+
+    def compute_unit_costs_WWTP(self, model, solver):
+
+        from itertools import combinations_with_replacement
+        unit_cost_data = []
+        
+        for combo in combinations_with_replacement(model.WWTP, 3):
+            WWTP1, WWTP2, WWTP3 = combo
+            #t = 120 + 12*2  # May 2037
+            #t = 120 + 12*10   #May 2045
+            #t = 120 + 12*12  # May 2047
+            #t = 120 + 12*19  # May 2054
+            #t = 120 + 12*19 + 1 # June 2054 (L2 turns on in Sunnyvale)
+            #t = 120 + 12*10   #May 2045
+            #t = 120 + 12     # May 2036
+            
+            t = 120 + 12*19 + 1 # June 2054 (L2 turns on in Sunnyvale)
+            #t = 120 + 12 + 1 # June 2036 
+            #t = 120 + 12*10 + 1  #June 2045
+            
+            model_2 = model.clone()  # Fast deep copy of the model
+
+            if sum(value(model.b[WWTP1, ll, t]) for ll in model.L) == 0:
+                print('Skipping', WWTP1, 'at t=', t, 'because it is not built')
+                continue
+            if sum(value(model.b[WWTP2, ll, t]) for ll in model.L) == 0:
+                print('Skipping', WWTP2, 'at t=', t, 'because it is not built')
+                continue
+            if sum(value(model.b[WWTP3, ll, t]) for ll in model.L) == 0:
+                print('Skipping', WWTP3, 'at t=', t, 'because it is not built')
+                continue
+            # conditions to save time:
+            if (WWTP1 == 'Palo Alto') and (WWTP2 == 'SJSC') and (WWTP3 == 'SJSC'):
+                continue
+
+            if (WWTP1 == 'SJSC') and (WWTP2 == 'Sunnyvale') and (WWTP3 == 'Sunnyvale'):
+                continue
+
+            if (WWTP1 == 'Palo Alto') and (WWTP2 == 'Sunnyvale') and (WWTP3 == 'Sunnyvale'):
+                continue
+
+
+
+            for ww in model_2.WWTP:
+                #print('Checking WWTP:',ww , 'compared to', WWTP1, WWTP2, WWTP3)
+                if (ww != WWTP1) and (ww != WWTP2) and (ww != WWTP3):
+                    #print('Forcing shutdown in:', ww)
+                    for ll in model_2.L: 
+                        if value(model.b[ww, ll, t]) == 1:
+                            #print('Fixing status of', ww, ll, 'to 0')
+                            model_2.status[ww, ll, t].fix(0)
+                
+                '''
+                else:
+                    for ll in model_2.L:
+                        if value(model.b[ww, ll, t]) == 1:
+                            model_2.status[ww, ll, t].unfix()
+                '''
+
+            # set all dis_minus_reg to 0
+            for ww in model_2.WWTP:
+                if ww != WWTP1:
+                    model_2.dis_minus_reg[ww, t] = 0
+            
+            print('Computing unit costs for', WWTP1, 'with', WWTP2, 'and', WWTP3, 'at t=', t)
+                                        
+            
+            
+                    
+                    
+            # loop over changes in removal requirements
+            max_reg = sum(value(model.dis_minus_reg[WWTP, t]) for WWTP in model.WWTP)
+            max_reg = 14000
+
+            for reg in np.linspace(1, max_reg, 500):
+                # Fix the required removal to the current value
+                model_2.dis_minus_reg[WWTP1, t] =  reg
+
+                # Run simulation and calculate the opex of the WWTP
+                results_WWTP = solver.solve(model_2, tee=False)
+                if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                    print(f"Solver did not find an optimal solution for {WWTP1} and {WWTP2} and {WWTP3} for t={t} and required removal={reg}.")
+                    break
+                
+                opex_WWTP = sum(value(model_2.opex_monthly[WWTP1, L, t]) for L in model_2.L)
+                opex_WWTP2 = sum(value(model_2.opex_monthly[WWTP2, L2, t]) for L2 in model_2.L)
+                opex_WWTP3 = sum(value(model_2.opex_monthly[WWTP3, L3, t]) for L3 in model_2.L)
+                opex_total = sum(value(model_2.opex_monthly[ww, ll, t]) for ww in model_2.WWTP for ll in model_2.L)
+                
+                # Find L
+                
+                L1 = []
+                L2 = []
+                L3 = []
+                
+                for L in model_2.L:
+                    if value(model_2.status[WWTP1, L, t]) > 0:
+                        L1.append(L)
+                    if value(model_2.status[WWTP2, L, t]) > 0:
+                        L2.append(L)
+                    if value(model_2.status[WWTP3, L, t]) > 0:
+                        L3.append(L)
+                    
+            
+                r_total_new = sum(model_2.r[WWTP2, t].value for WWTP2 in model_2.WWTP)
+
+                unit_cost_data.append({
+                    'WWTP': WWTP1,
+                    'WWTP2': WWTP2,
+                    'WWTP3': WWTP3,
+                    'L1': L1,
+                    'L2': L2,
+                    'L3': L3,
+                    't': t,
+                    'datetime': self.datetime[t],
+                    'Additional_removal': reg,
+                    'Required_removal': sum(model.dis_minus_reg[WWTP, t].value for WWTP in model_2.WWTP),
+                    'Opex_1': opex_WWTP,
+                    'Opex_2': opex_WWTP2,
+                    'Opex_3': opex_WWTP3,
+                    'Opex_total_new': opex_total,
+                    'r_total_new': r_total_new,
+                    #'Unit_Cost': opex_WWTP / x_WWTP * (10**6/30) if x_WWTP > 0 else float('inf')
+                })
+            
+            
+     
+        df = pd.DataFrame(unit_cost_data)
+        df.to_csv(self.figpath_base + f"unit_cost_dt_{t}.csv", index=False)
+    
+    
+    
+    
+    
+    def compute_unit_costs(self, model, solver):
+
+        from itertools import combinations_with_replacement
+        unit_cost_data = []
+        
+        for combo in combinations_with_replacement(model.WWTP, 3):
+            WWTP1, WWTP2, WWTP3 = combo
+            #t = 120 + 12*2  # May 2037
+            #t = 120 + 12*10   #May 2045
+            #t = 120 + 12*12  # May 2047
+            t = 120 + 12*19  # May 2054
+            model_2 = model.clone()  # Fast deep copy of the model
+            
+            for L in model.L:
+                # Create a new model instance for each WWTP and upgrade combination
+                if value(model.b[WWTP1,L,t]) == 0:
+                    print('Skipping', WWTP1, L, 'because no upgrade is built.')
+                    continue
+                
+                # Fix the status of upgrade to 1
+                model_2.status[WWTP1, L, t].fix(1)
+
+                for L2 in model.L:                        
+                    if value(model.b[WWTP2, L2, t]) == 0:
+                        continue                    
+                    
+                    # fix the 
+                    model_2.status[WWTP2, L2, t].fix(1)
+
+                    
+                    for L3 in model.L:
+                        if value(model.b[WWTP3, L3, t]) == 0:
+                            continue
+                        
+                        print('Computing unit costs for', WWTP1, L, 'with', WWTP2, L2, 'and', WWTP3, L3, 'at t=', t)
+                                
+                        # Fix the status of the third upgrade to 1
+                        model_2.status[WWTP3, L3, t].fix(1)
+ 
+        
+                        # fix all other statuses to 0 and required removal to 0:
+                        for ww in model_2.WWTP:
+                            for ll in model_2.L:
+                                if (ww, ll) != (WWTP1, L) and (ww, ll) != (WWTP2, L2) and (ww, ll) != (WWTP3, L3):
+                                    model_2.status[ww, ll, t].fix(0)   
+                            
+                            # turn off all dis_minu_reg for other WWTPs
+                            if ww != WWTP1:
+                                model_2.dis_minus_reg[ww, t] = 0
+                    
+                    
+                        # loop over changes in removal requirements
+                        max_reg = sum(value(model.dis_minus_reg[WWTP, t]) for WWTP in model.WWTP)
+
+                        for reg in np.linspace(1, max_reg * 2, 250):
+                            # Fix the required removal to the current value
+                            model_2.dis_minus_reg[WWTP1, t] =  reg
+
+                            # Run simulation and calculate the opex of the WWTP
+                            results_WWTP = solver.solve(model_2, tee=False)
+                            if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                                print(f"Solver did not find an optimal solution for {WWTP1} with {L} and {WWTP2} with {L2} and {WWTP3} with {L3} for t={t} and required removal={reg}.")
+                                break
+                            
+                            opex_WWTP = value(model_2.opex_monthly[WWTP1, L, t])
+                            opex_WWTP2 = value(model_2.opex_monthly[WWTP2, L2, t])
+                            opex_WWTP3 = value(model_2.opex_monthly[WWTP3, L3, t]) 
+                            opex_total = sum(value(model_2.opex_monthly[ww, ll, t]) for ww in model_2.WWTP for ll in model_2.L)
+                            x_WWTP = value(model_2.x[WWTP1, L, t])
+                            x_WWTP2 = value(model_2.x[WWTP2, L2, t])
+                            x_WWTP3 = value(model_2.x[WWTP3, L3, t])
+                        
+                            r_total_new = sum(model_2.r[WWTP2, t].value for WWTP2 in model_2.WWTP)
+
+                            unit_cost_data.append({
+                                'WWTP': WWTP1,
+                                'WWTP2': WWTP2,
+                                'WWTP3': WWTP3,
+                                'L1': L,
+                                'L2': L2,
+                                'L3': L3,
+                                't': t,
+                                'datetime': self.datetime[t],
+                                'Additional_removal': reg,
+                                'Required_removal': sum(model.dis_minus_reg[WWTP, t].value for WWTP in model_2.WWTP),
+                                'Opex_1': opex_WWTP,
+                                'Opex_2': opex_WWTP2,
+                                'Opex_3': opex_WWTP3,
+                                'Opex_total_new': opex_total,
+                                'X1': x_WWTP,
+                                'X2': x_WWTP2,
+                                'X3': x_WWTP3,
+                                'r_total_new': r_total_new,
+                                #'Unit_Cost': opex_WWTP / x_WWTP * (10**6/30) if x_WWTP > 0 else float('inf')
+                            })
+
+                        model_2.status[WWTP3, L3, t].unfix()  # Unfix the status after the loop
+        
+                    model_2.status[WWTP2, L2, t].unfix()        # Unfix the status after the loop
+        
+                model_2.status[WWTP1, L, t].unfix()        # Unfix the status after the loop
+
+            
+        df = pd.DataFrame(unit_cost_data)
+        df.to_csv(self.figpath_base + f"unit_cost_dt_{t}.csv", index=False)
+
+
+
+
+
+    def compute_unit_costs_loop(self, model, solver):
+        
+
+        for WWTP in model.WWTP:
+            unit_cost_data = []
+            # assign t = 120 (first timestep of regulation
+            #t = 120    # May 2035
+            #t = 120 + 12*2 + 1 #June 2037
+            #t = 120 + 12*5 + 1 #June 2040
+            #t = 350
+            #t = 120 + 12*2  # May 2037
+            t = 120 + 12*10   #May 2045
+
+            for L in model.L:
+                # Create a new model instance for each WWTP and upgrade combination
+                model_2 = model.clone()  # Fast deep copy of the model
+
+                if value(model.b[WWTP,L,t]) == 0:
+                    print('Skipping', WWTP, L, 'because no upgrade is built.')
+                    continue
+                
+                # Fix the status of both upgrades to 1
+                model_2.status[WWTP, L, t].fix(1)
+
+
+                    
+                for WWTP2 in model.WWTP:
+                    for L2 in model.L:
+                        
+                        if value(model.b[WWTP2, L2, t]) == 0:
+                            continue
+                        
+                        #print('Computing unit costs for', WWTP, L, 'with', WWTP2, L2, 'at t=', t)
+                        
+                        
+                        model_2.status[WWTP2, L2, t].fix(1)
+
+                        for WWTP3 in model.WWTP:
+                            #if WWTP3 == WWTP2:
+                            #    continue
+                            
+                            for L3 in model.L:
+                                if value(model.b[WWTP3, L3, t]) == 0:
+                                    continue
+
+                                print('Computing unit costs for', WWTP, L, 'with', WWTP2, L2, 'and', WWTP3, L3, 'at t=', t)
+                                
+                                # Fix the status of the third upgrade to 1
+                                model_2.status[WWTP3, L3, t].fix(1)
+
+                
+                
+                                # fix all other statuses to 0 and required removal to 0:
+                                for ww in model_2.WWTP:
+                                    for ll in model_2.L:
+                                        if (ww, ll) != (WWTP, L) and (ww, ll) != (WWTP2, L2) and (ww, ll) != (WWTP3, L3):
+                                            model_2.status[ww, ll, t].fix(0)   
+                                    
+                                    # turn off all dis_minu_reg for other WWTPs
+                                    if ww != WWTP:
+                                        model_2.dis_minus_reg[ww, t] = 0
+                            
+                            
+                                # loop over changes in removal requirements
+                                max_reg = sum(value(model.dis_minus_reg[WWTP, t]) for WWTP in model.WWTP)
+
+                                for reg in np.linspace(1, max_reg * 3, 250):
+                                    # Fix the required removal to the current value
+                                    model_2.dis_minus_reg[WWTP, t] =  reg
+
+                                    # Run simulation and calculate the opex of the WWTP
+                                    results_WWTP = solver.solve(model_2, tee=False)
+                                    if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                                        print(f"Solver did not find an optimal solution for {WWTP} with {L} and {WWTP2} with {L2} and {WWTP3} with {L3} for t={t} and required removal={reg}.")
+                                        break
+                                    
+                                    opex_WWTP = value(model_2.opex_monthly[WWTP, L, t])
+                                    opex_WWTP2 = value(model_2.opex_monthly[WWTP2, L2, t])
+                                    opex_WWTP3 = value(model_2.opex_monthly[WWTP3, L3, t]) 
+                                    opex_total = sum(value(model_2.opex_monthly[ww, ll, t]) for ww in model_2.WWTP for ll in model_2.L)
+                                    x_WWTP = value(model_2.x[WWTP, L, t])
+                                    x_WWTP2 = value(model_2.x[WWTP2, L2, t])
+                                    x_WWTP3 = value(model_2.x[WWTP3, L3, t])
+                                
+                                    r_total_new = sum(model_2.r[WWTP2, t].value for WWTP2 in model_2.WWTP)
+
+                                    unit_cost_data.append({
+                                        'WWTP': WWTP,
+                                        'WWTP2': WWTP2,
+                                        'WWTP3': WWTP3,
+                                        'L1': L,
+                                        'L2': L2,
+                                        'L3': L3,
+                                        't': t,
+                                        'datetime': self.datetime[t],
+                                        'Additional_removal': reg,
+                                        'Required_removal': sum(model_2.dis_minus_reg[WWTP, t].value for WWTP in model_2.WWTP),
+                                        'Opex_1': opex_WWTP,
+                                        'Opex_2': opex_WWTP2,
+                                        'Opex_3': opex_WWTP3,
+                                        'Opex_total_new': opex_total,
+                                        'X1': x_WWTP,
+                                        'X2': x_WWTP2,
+                                        'X3': x_WWTP3,
+                                        'r_total_new': r_total_new,
+                                        #'Unit_Cost': opex_WWTP / x_WWTP * (10**6/30) if x_WWTP > 0 else float('inf')
+                                    })
+
+                                model_2.status[WWTP3, L3, t].unfix()  # Unfix the status after the loop
+                
+                        model_2.status[WWTP2, L2, t].unfix()        # Unfix the status after the loop
+                
+                model_2.status[WWTP, L, t].unfix()        # Unfix the status after the loop
+                
+
+                    
+            df = pd.DataFrame(unit_cost_data)
+            df.to_csv(self.figpath_base + f"unit_cost_{WWTP}_dt_{t}.csv", index=False)
+
+    
+    
+    
+    
+    def compute_unit_costs_fix_boundary(self, model, solver):
+        
+        for WWTP in model.WWTP:
+            unit_cost_data = []
+            
+
+            for L in model.L:
+                model_2 = model.clone()  # Fast deep copy of the model
+                
+                # assign t = 120 (first timestep of regulation
+                #t = 120    # May 2035
+                t = 120 + 12*2 + 1 #June 2037
+                #t = 120 + 12*5 + 1 #June 2040
+                t = 350
+
+                if value(model.b[WWTP,L,t]) == 0:
+                    continue
+                
+                
+                print('Computing unit costs for', WWTP, 'with upgrade', L)
+                # Fix the status of the upgrade to 1
+                model_2.status[WWTP, L, t].fix(1)
+                
+
+                # Fix the x values for all other WWTPs and upgrades
+
+                
+                '''
+                # fix all other statuses to 0 and required removal to 0:
+                for ww in model_2.WWTP:
+                    for ll in model_2.L:
+                        if (ww, ll) != (WWTP, L):
+                            model_2.status[ww, ll, t].fix(0)
+                    if WWTP != ww:
+                        model_2.dis_minus_reg[ww, t] = 0
+                '''
+                
+                # loop over changes in removal requirements
+                max_reg = sum(value(model.dis_minus_reg[WWTP, t]) for WWTP in model.WWTP)
+                opex_total_prev = sum(value(model.opex_monthly[ww, ll, t-1]) for ww in model.WWTP for ll in model.L)
+                r_prev = sum(model.r[WWTP2, t-1].value for WWTP2 in model.WWTP if WWTP2 != WWTP)
+                
+                for reg in np.linspace(1, max_reg * 2, 1000):
+                    # Fix the required removal to the current value
+                    model_2.dis_minus_reg[WWTP, t] = model.dis_minus_reg[WWTP, t].value + reg
+                    
+                    
+                    # Bound x value to its previous value (max)
+                    if hasattr(model_2, 'x_exact_constraint'):
+                        model_2.del_component(model_2.x_exact_constraint)  # remove old constraints first
+                    model_2.x_exact_constraint = ConstraintList()
+                    
+                    
+                    # Bound the x value to the previous value
+                    for ww in model_2.WWTP:
+                        for ll in model_2.L:
+                                if (ww, ll) != (WWTP, L):                                    
+                                    ub_val = model.x[ww,ll,t-1].value * model.status[ww,ll,t-1].value   # Use the base value of x from the previous time period
+                                    model_2.x_exact_constraint.add(model_2.x[ww, ll, t] * model_2.status[ww,ll,t] <= ub_val)
+                    
+                    
+                    # Run simulation and calculate the opex of the WWTP
+                    results_WWTP = solver.solve(model_2, tee=False)
+                    if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                        print(f"Solver did not find an optimal solution for {WWTP} with {L} at t={t} and required removal={reg}.")
+                        break
+                    
+                    opex_WWTP = value(model_2.opex_monthly[WWTP, L, t])
+                    opex_total = sum(value(model_2.opex_monthly[ww, ll, t]) for ww in model_2.WWTP for ll in model_2.L)
+                    x_WWTP = value(model_2.x[WWTP, L, t])
+                    r_new = sum(model_2.r[WWTP2, t].value for WWTP2 in model_2.WWTP if WWTP2 != WWTP)
+                    r_total_new = sum(model_2.r[WWTP2, t].value for WWTP2 in model_2.WWTP)
+
+                    unit_cost_data.append({
+                        'WWTP': WWTP,
+                        'L': L,
+                        't': t,
+                        'datetime': self.datetime[t],
+                        'Additional_removal': reg,
+                        'Required_removal': sum(model_2.dis_minus_reg[WWTP, t].value for WWTP in model_2.WWTP),
+                        'Opex': opex_WWTP,
+                        'Opex_total_new': opex_total,
+                        'Opex_total_prev': opex_total_prev,
+                        'X': x_WWTP,
+                        'r_prev': r_prev,
+                        'r_new': r_new,
+                        'r_total_new': r_total_new,
+                        #'Unit_Cost': opex_WWTP / x_WWTP * (10**6/30) if x_WWTP > 0 else float('inf')
+                    })
+                
+                model_2.status[WWTP, L, t].unfix()        # Unfix the status after the loop
+
+                    
+            df = pd.DataFrame(unit_cost_data)
+            df.to_csv(self.figpath_base + f"unit_cost_{WWTP}_dt_{t}.csv", index=False)
+
+
+    
+    
+    
+    
+    
+    def compute_marginal_costs(self, model, solver):
+        
+        model_2 = model.clone()  # Fast deep copy of the model
+
+        z_fix = {}; status_fix = {}; x_fix = {}; opex_fix = {}; b_fix = {}; u_fix = {}; r_fix = {}; x_max_fix = {}
+        for WWTP in model.WWTP:
+            try:
+                path = self.figpath_opex_partial +'results_'+ WWTP +'.csv'
+            except:
+                if self.Constraint_tag == 'Partial_coordination':
+                    raise SystemExit('Cannot find data for prior infrastructure investments to run Partial Coordination model')
+            
+            df = pd.read_csv(path)
+            status_fix = {**status_fix, **{(WWTP, L, t): int(df.loc[t, L+'_status']) for L in model.L for t in model.t}}
+            x_fix = {**x_fix, **{(WWTP, L, t): int(df.loc[t, L+'_x']) for L in model.L for t in model.t}}
+            opex_fix = {**opex_fix, **{(WWTP, L, t): float(df.loc[t, L+'_opex']) for L in model.L for t in model.t}}
+            z_fix = {**z_fix, **{(WWTP, L, t): int(df.loc[t, L+'_z']) for L in model.L for t in model.t}}
+            b_fix = {**b_fix, **{(WWTP, L, t): int(df.loc[t, L+'_b']) for L in model.L for t in model.t}}
+            u_fix = {**u_fix, **{(WWTP, L, t): int(df.loc[t, L+'_u']) for L in model.L for t in model.t}}
+            r_fix = {**r_fix, **{(WWTP, t): float(df.loc[t, 'Total_removal']) for t in model.t}}
+            x_max_fix = {**x_max_fix, **{(WWTP, L): float(df.loc[0, L+'_x_max']) for L in model.L}}
+        
+        for WWTP in model.WWTP:
+            for L in model.L:
+                for t in model.t:
+                    if (WWTP, L, t) not in b_fix:
+                        print(f"Missing key: {(WWTP, L, t)}")
+            
+        for WWTP in model.WWTP:
+            marginal_cost_data = []
+            
+            for L in model.L:
+                for t in model.t:
+
+                    #only consider time periods where the discharge minus regulation is greater than 0
+                    
+                    # skip the first timeperiod
+                    if t==0 or t == 120:
+                        continue
+                    
+                    reg_t = sum(value(model.dis_minus_reg[WWTP,t]) for WWTP in model.WWTP)
+                    reg_t_minus_1 = sum(value(model.dis_minus_reg[WWTP,t-1]) for WWTP in model.WWTP)
+                    
+                    if reg_t_minus_1 > 0:
+                        last_t = t-1
+
+                    if reg_t <= 0:
+                        continue
+
+
+                    # if it is not built then skip
+                    if b_fix[(WWTP, L, t)] == 0:    
+                        continue
+
+
+                    opex_WWTP_base = opex_fix[(WWTP, L, t)]
+                    opex_total_base = sum(opex_fix[(ww, ll, t)] for ww in model.WWTP for ll in model.L)
+                    opex_total_prev = sum(opex_fix[(ww, ll, last_t)] for ww in model.WWTP for ll in model.L)
+
+                    x_base = x_fix[(WWTP, L, t)]
+                    r_prev = sum(r_fix[(WWTP2, last_t)] for WWTP2 in model.WWTP if WWTP2 != WWTP)
+
+ 
+                    
+                    #model = self.build()
+                    
+                    # Fix the status of the upgrade to 1
+                    model_2.status[WWTP, L, t].fix(1)
+
+                    
+                    # Constrain x value to its previous value (max)
+                    if hasattr(model_2, 'x_exact_constraint'):
+                        model_2.del_component(model_2.x_exact_constraint)  # remove old constraints first
+                    
+                    model_2.x_exact_constraint = ConstraintList()
+
+
+                    for ww in model_2.WWTP:
+                        for ll in model_2.L:
+                                if (ww, ll) != (WWTP, L):                                    
+                                    ub_val = x_fix[(ww,ll,last_t)] * status_fix[(ww,ll,last_t)]   # Use the base value of x from the previous time period
+                                    #model.x[ww, ll, t].fix(ub_val)
+                                    model_2.x_exact_constraint.add(model_2.x[ww, ll, t] * model_2.status[ww,ll,t] <= ub_val)
+                                    #model.x[WWTP, L, t].setub(ub_val)
+                                    #model.x_ub_constraints.add(model.x[WWTP, L, t] <= ub_val)
+                                    #model.x[ww, ll, t].fix(value(model.x[ww, ll, t-1]))
+                                    #model.status[ww, ll, t].fix(value(model.status[ww, ll, t-1])) 
+                    
+                    
+                    results_WWTP = solver.solve(model_2, tee=False)
+                    
+                    if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                        print(f"[WARNING] New solution infeasible at ({WWTP}, {L}, {t}) with t-1 = {last_t}")
+                        continue
+                    
+                    # Unfix the status of the upgrade
+                    model_2.status[WWTP, L, t].unfix()
+                    
+                    opex_WWTP_new = value(model_2.opex_monthly[WWTP, L, t])
+                    opex_total_new = value(sum(model_2.opex_monthly[ww, ll, t] for ww in model_2.WWTP for ll in model_2.L))
+                    x_new = value(model_2.x[WWTP, L, t])
+                    r_current = sum(value(model_2.r[WWTP2, t]) for WWTP2 in model_2.WWTP if WWTP2 != WWTP)
+                    
+                    #delta_opex = opex_total_new - opex_total_base
+                    delta_opex = opex_total_new - opex_total_prev
+                    delta_x = x_new - status_fix[(WWTP,L,t)] * x_base
+                    delta_reg = reg_t - reg_t_minus_1
+
+                    marginal_cost_reg = delta_opex / delta_reg * (10**6/30) if delta_reg != 0 else float('inf')  # Avoid division by zero [units: $/lb N]
+
+                    # Marginal cost: cost reduction per kg N removed less
+                    marginal_cost_data.append((WWTP, L, t, self.datetime[t], x_base, x_new, opex_WWTP_base, opex_WWTP_new, opex_total_base, opex_total_prev, opex_total_new, r_prev, r_current, delta_opex, delta_x, delta_reg, marginal_cost_reg))
+
+            # Save data to CSV
+            df = pd.DataFrame(marginal_cost_data, columns=["WWTP", "L", "t", "datem", "x_base", "x_new", "opex_WWTP_base", "opex_WWTP_new", "opex_total_base", "opex_total_prev", "opex_total_new", "r_prev", "r_current", "delta_opex", "delta_x", "delta_reg", "marginal_cost_reg"])
+            df.to_csv(self.figpath_base + f"marginal_cost_{WWTP}.csv", index=False)
+    
+    
+    
+    
+    
+    
+    def compute_marginal_costs_fix_status(self, model, solver):
+        for WWTP in model.WWTP:
+            marginal_cost_data = []
+
+            for L in model.L:
+                for t in model.t:
+
+                    #only consider time periods where the discharge minus regulation is greater than 0
+                    if value(model.dis_minus_reg[WWTP, t]) <= 0:
+                        continue
+
+                    # skip the first timeperiod
+                    if t == 120:
+                        continue
+
+                    # if it is not built then skip
+                    if value(model.b[WWTP, L, t]) == 0:
+                        continue
+                                              
+
+                    '''
+                    # Fix all integer decision variables to their base values
+                    # Solve if all other variables are fixed at that removal limit
+                    for ww in model.WWTP:
+                        for ll in model.L:
+                            model.b[ww, ll, t].fix(value(model.b[ww, ll, t]))
+                            model.z[ww, ll, t].fix(value(model.z[ww, ll, t]))
+                            model.u[ww, ll, t].fix(value(model.u[ww, ll, t]))
+                            model.x_max[ww, ll].fix(value(model.x_max[ww, ll]))
+                    '''
+                    
+                    model = self.build()
+                    results_base = solver.solve(model, tee=False)
+                    
+                    if results_base.solver.termination_condition != TerminationCondition.optimal:
+                        print(f"[WARNING] Base solution infeasible at ({WWTP}, {L}, {t})")
+                        continue
+                    
+                    opex_WWTP_base = value(model.opex_monthly[WWTP, L, t])
+                    opex_total_base = value(sum(model.opex_monthly[ww, ll, t] for ww in model.WWTP for ll in model.L))
+
+                    x_base = value(model.x[WWTP, L, t])
+                    r_prev = sum(value(model.r[WWTP2, t-1]) for WWTP2 in model.WWTP if WWTP2 != WWTP)      
+                    
+                    '''
+                    if opex_WWTP_base - opex_total_base > 0.01:
+                        print(f"[WARNING] Opex base value changed at ({WWTP}, {L}, {t}) from {opex_initial} to {opex_base}")
+                    '''
+                    
+
+                    
+                    # Fix the variables for all other WWTPs and upgrades
+                    for ww in model.WWTP:
+                        for ll in model.L:
+                            model.b[ww, ll, t].fix(value(model.b[ww, ll, t]))
+                            model.z[ww, ll, t].fix(value(model.z[ww, ll, t]))
+                            model.u[ww, ll, t].fix(value(model.u[ww, ll, t]))
+                            model.x_max[ww, ll].fix(value(model.x_max[ww, ll]))
+                    
+                    # Fix the status of the upgrade to 1
+                    model.status[WWTP, L, t].fix(1)
+
+                    # Fix all other variables to their previous values
+                    for ww in model.WWTP:
+                        for ll in model.L:
+                                if (ww, ll) != (WWTP, L):
+                                    model.x[ww, ll, t].fix(value(model.x[ww, ll, t-1]))
+                                    model.status[ww, ll, t].fix(value(model.status[ww, ll, t-1])) 
+                    
+                    results_WWTP = solver.solve(model, tee=False)
+                    
+                    if results_WWTP.solver.termination_condition != TerminationCondition.optimal:
+                        print(f"[WARNING] New solution infeasible at ({WWTP}, {L}, {t})")
+                        continue
+                    opex_WWTP_new = value(model.opex_monthly[WWTP, L, t])
+                    opex_total_new = value(sum(model.opex_monthly[ww, ll, t] for ww in model.WWTP for ll in model.L))
+                    x_new = value(model.x[WWTP, L, t])
+                    r_current = sum(value(model.r[WWTP2, t]) for WWTP2 in model.WWTP if WWTP2 != WWTP)
+
+                    # Marginal cost: cost reduction per kg N removed less
+                    marginal_cost_data.append((WWTP, L, t, x_base, x_new, opex_WWTP_base, opex_WWTP_new, opex_total_base, opex_total_new, r_prev, r_current))
+
+                    # Unfix  all variables
+                    for ww in model.WWTP:
+                        for ll in model.L:
+                            model.x[ww, L, t].unfix()
+                            model.status[ww, ll, t].unfix()
+
+            # Unfix all variables
+            for ww in model.WWTP:
+                for ll in model.L:
+                    for tt in model.t:
+                        model.x[ww, ll, tt].unfix()
+                        model.status[ww, ll, tt].unfix()
+
+            # Save data to CSV
+            df = pd.DataFrame(marginal_cost_data, columns=["WWTP", "L", "t", "x_base", "x_new", "opex_WWTP_base", "opex_WWTP_new", "opex_total_base", "opex_total_new", "r_prev", "r_current"])
+            df.to_csv(self.figpath_base + f"marginal_cost_{WWTP}.csv", index=False)        
+
 
 
 if __name__ == "__main__":
@@ -1329,8 +2028,10 @@ if __name__ == "__main__":
         params['Constraint_tag'] = 'Partial_coordination'
         if params['seasonal_regulation']:
             params['figpath_capex'] = 'Figures/' + params['version_num'] + "/Seasonal/" + 'No_coordination' + "/"
+            params['figpath_opex_partial'] = 'Figures/' + params['version_num'] + "/Seasonal/" + 'Partial_coordination' + "/"
         else:
             params['figpath_capex'] = 'Figures/' + params['version_num'] + "/Year_round/" + 'No_coordination' + "/"
+            params['figpath_opex_partial'] = 'Figures/' + params['version_num'] + "/Year_round/" + 'Partial_coordination' + "/"
     else:
         params['Constraint_tag'] = 'No_coordination'
     
