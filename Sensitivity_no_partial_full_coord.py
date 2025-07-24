@@ -7,18 +7,21 @@ basepath = "CapExpParams.json"    # use for running the script in jupyter notebo
 fp = os.path.join(os.getcwd(),basepath)     
 params = json.load(open(fp))
 
-params["adaptive_infrastructure"]= True
+params["adaptive_infrastructure"]= False
 
-params["version_num"] = 'Sensitivity_all_coordination_S_31Jan25'
+params["version_num"] = 'Sensitivity_all_coordination_NS_23Jul25'
+
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = True
 params["update_figures"] = False
+params["marginal_cost_analysis"] = False
 
 
-projection_multipliers = np.linspace(0.8, 1.1, 31)
+#projection_multipliers = np.linspace(0.8, 1.1, 31)
+projection_multipliers = np.linspace(0.8, 1.1, 61)
 
 for i, mult in enumerate(projection_multipliers):
-    mult = round(mult, 2)
+    mult = round(mult, 3)
     params["projection_multiplier"] = mult
     
     
@@ -38,7 +41,7 @@ for i, mult in enumerate(projection_multipliers):
         os.makedirs(params['figpath'])
 
     m = capacity_expansion(params)
-    #m.main()
+    m.main()
 
     print("completed no coordination optimization for run = {}".format(i))
 
@@ -65,7 +68,7 @@ for i, mult in enumerate(projection_multipliers):
         os.makedirs(params['figpath'])
 
     m = capacity_expansion(params)
-    #m.main()
+    m.main()
 
     print("completed partial coordination optimization for run = {}".format(i))
 
@@ -87,7 +90,7 @@ for i, mult in enumerate(projection_multipliers):
         os.makedirs(params['figpath'])
 
     m = capacity_expansion(params)
-    #m.main()
+    m.main()
 
     print("completed full coordination optimization for run = {}".format(i))
 

@@ -1,5 +1,5 @@
 {
-    "trading_market": true,
+    "trading_market": false,
     "trading_market_year": 0,
     "joint_infrastructure": false,
     "unfix_infrastructure_year": 0,
@@ -8,7 +8,7 @@
     "update_figures": false,
     "sensitivity_analysis": false,
     "marginal_cost_analysis": true,
-    "version_num": "Marginal_unit_cost_12June25_by_WWTP",
+    "version_num": "Marginal_unit_cost_21Jul25_by_WWTP",
     "Objective_tag": "Opex",
     "solver_type": "gurobi",
     "include_L3": true,

@@ -8,7 +8,7 @@ fp = os.path.join(os.getcwd(),basepath)
 params = json.load(open(fp))
 
 # Initialize parameters
-params["version_num"] = 'Adaptive_31Jan25'
+params["version_num"] = 'Adaptive_11Jun25'
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
@@ -18,6 +18,7 @@ params["adaptive_infrastructure"]= True
 
 params["trading_market_year"] = 0
 params["unfix_infrastructure_year"] = 0  
+params["marginal_cost_analysis"] = True
 
 
 
@@ -54,6 +55,8 @@ params['figpath_capex'] = params['figpath']
 
 params['figpath'] = 'Figures/' + params['version_num'] +  "/" + params["Constraint_tag"] + "/" 
 params['figpath_base'] = 'Figures/' + params['version_num'] + "/" + params["Constraint_tag"] + "_" 
+
+params['figpath_opex_partial'] = params['figpath']
 
 if not os.path.exists(params['figpath']):
         os.makedirs(params['figpath'])
