@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 
 Figures/.DS_Store
+
+local/
+
 # OSX useful to ignore
 *.DS_Store
 .AppleDouble
