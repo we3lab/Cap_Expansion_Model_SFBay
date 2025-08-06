@@ -41,11 +41,12 @@ class capacity_expansion():
         """
         model = self.build()
 
+        output_path = self.figpath_base + 'solver_log.txt'
         
         # Solve MILP with gurobi
         if self.solver_type == 'gurobi':
             solver = SolverFactory('gurobi')
-            solver.solve(model, tee=True)
+            solver.solve(model, tee=True, logfile=output_path)
         
 
         # Solve LP with ipopt
