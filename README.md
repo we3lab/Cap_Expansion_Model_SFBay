@@ -1,4 +1,4 @@
-This repository allows you to optimize regional investment portfolios for WWTPs in Lower South San Fransisco Bay
+This repository allows you to run CLEANRWastewater to optimize regional investment portfolios for WWTPs in Lower South San Fransisco Bay
 
 The steps below will show you how to: 
     (1) set-up your environment 
