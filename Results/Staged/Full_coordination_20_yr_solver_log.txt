@@ -1,0 +1,52 @@
+Solver command line: ['/Users/sinanabifarraj/miniconda3/envs/sfbaycap/bin/python']
+
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2548088
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Read LP format model from file /var/folders/c4/xftw48qx1ln6q3hxvkc80tdw0000gn/T/tmp9yaki797.pyomo.lp
+Reading time = 0.10 seconds
+x1: 39142 rows, 31705 columns, 125555 nonzeros
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[rosetta2] - Darwin 24.5.0 24F74)
+
+CPU model: Apple M2
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 39142 rows, 31705 columns and 125555 nonzeros
+Model fingerprint: 0x7ca61e20
+Model has 14562 quadratic constraints
+Variable types: 14821 continuous, 16884 integer (16884 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+00]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [7e+00, 1e+04]
+Presolve removed 30206 rows and 25212 columns
+Presolve time: 0.03s
+Presolved: 13428 rows, 9086 columns, 44849 nonzeros
+Presolved model has 1338 SOS constraint(s)
+Variable types: 5967 continuous, 3119 integer (3115 binary)
+Found heuristic solution: objective 584.0923409
+Found heuristic solution: objective 579.0181174
+Found heuristic solution: objective 488.1293454
+
+Root relaxation: objective 4.745047e+02, 140 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  474.50466    0    9  488.12935  474.50466  2.79%     -    0s
+*    0     0               0     475.0628937  475.06289  0.00%     -    0s
+
+Explored 1 nodes (182 simplex iterations) in 0.24 seconds (0.23 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: 475.063 475.063 488.129 ... 584.092
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.750628938797e+02, best bound 4.750628936617e+02, gap 0.0000%
+

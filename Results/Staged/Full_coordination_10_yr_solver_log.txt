@@ -1,0 +1,61 @@
+Solver command line: ['/Users/sinanabifarraj/miniconda3/envs/sfbaycap/bin/python']
+
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2548088
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Read LP format model from file /var/folders/c4/xftw48qx1ln6q3hxvkc80tdw0000gn/T/tmp2gmeayyk.pyomo.lp
+Reading time = 0.14 seconds
+x1: 38056 rows, 35786 columns, 218904 nonzeros
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[rosetta2] - Darwin 24.5.0 24F74)
+
+CPU model: Apple M2
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 38056 rows, 35786 columns and 218904 nonzeros
+Model fingerprint: 0xaba49c22
+Model has 15648 quadratic constraints
+Variable types: 14822 continuous, 20964 integer (20964 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+00]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [7e+00, 1e+04]
+Presolve removed 24169 rows and 24296 columns
+Presolve time: 0.32s
+Presolved: 21708 rows, 16205 columns, 100148 nonzeros
+Presolved model has 2526 SOS constraint(s)
+Variable types: 9700 continuous, 6505 integer (6505 binary)
+Found heuristic solution: objective 796.9068638
+
+Root relaxation: objective 2.319715e+02, 2036 iterations, 0.02 seconds (0.04 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  231.97145    0  491  796.90686  231.97145  70.9%     -    1s
+H    0     0                     585.5745136  231.97145  60.4%     -    1s
+H    0     0                     318.4986944  231.97145  27.2%     -    1s
+H    0     0                     318.3452388  231.97145  27.1%     -    1s
+     0     0  240.81535    0  134  318.34524  240.81535  24.4%     -    1s
+H    0     0                     318.0168858  240.81535  24.3%     -    1s
+     0     0  242.72641    0    2  318.01689  242.72641  23.7%     -    1s
+H    0     0                     316.5406556  242.72641  23.3%     -    1s
+     0     0          -    0       316.54066  316.53816  0.00%     -    1s
+
+Cutting planes:
+  Implied bound: 3
+  Flow cover: 1
+
+Explored 1 nodes (3487 simplex iterations) in 1.34 seconds (1.90 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 6: 316.541 318.017 318.345 ... 796.907
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.165406556179e+02, best bound 3.165381591030e+02, gap 0.0008%
+
