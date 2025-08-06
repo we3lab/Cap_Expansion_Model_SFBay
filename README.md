@@ -22,4 +22,4 @@ The steps below will show you how to:
    The directory "Jupyter_Scripts_for_Figures" contains all jupyter notebooks used to produce figures for this manuscript. The notebooks will import data from the Results directory (see previous step) and produce the required figures. All figures will be saved in the 'Figures' or 'Figures/SI' directory.
 
 
-For questions, suggestions, or issues, please contact Your Sinan Abi Farraj (sinanaf@stanford.ed).
+For questions, suggestions, or issues, please contact Sinan Abi Farraj (sinanaf@stanford.edu).
