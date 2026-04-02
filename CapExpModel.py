@@ -104,6 +104,8 @@ class capacity_expansion():
             results = pd.DataFrame(index=self.datetime)
             results['Required_removal'] =[value(model.dis_minus_reg[WWTP,t]) for t in model.t]
             results['Total_removal'] = [model.r[WWTP,t].value for t in model.t]
+            results['Excess_treatment'] = [model.excess_removal[WWTP,t].value for t in model.t]
+            results['Status_buying'] = [model.status_buying[WWTP,t].value for t in model.t]
             for L in model.L:                
                 results[L+'_r'] = [model.status[WWTP,L,t].value * model.x[WWTP,L,t].value for t in model.t]
                 results[L+'_x_max'] = [model.x_max[WWTP,L].value for t in model.t]
@@ -205,6 +207,10 @@ class capacity_expansion():
 
                 
         model = self.add_trading_market_constraint(model)
+        
+        
+        
+        model = self.check_trading(model)
         
 
 
@@ -427,7 +433,7 @@ class capacity_expansion():
             print('Requiring all infrastructure to meet their own individual permits')
             ind_end = len(self.datetime)
 
-        
+        self.ind_end_trading_market_year = ind_end
         # Constraint that the total WWTP discharge must be less than the WWTP regulation
         def regulation(model, WWTP, t):
             if t <= ind_end:
@@ -439,6 +445,69 @@ class capacity_expansion():
 
         return model
 
+    def check_trading(self, model):
+        """
+        Creates binary variable to check if WWTP is removing in excess of its own discharge limit (i.e. potentially trading)
+        or if WWTP is removing less than its own discharge limit (i.e. definitely buying)
+        """
+        model.status_buying = Var(model.WWTP, model.t, within=Binary, initialize=0, doc='Binary variable that is 1 when the WWTP is buying (removing less than its own discharge limit) and 0 otherwise')
+        model.excess_removal = Var(model.WWTP, model.t, within=Reals, initialize=0, doc='Variable that is positive when the WWTP is removing in excess of its own discharge limit and negative when the WWTP is removing less than its own discharge limit')
+
+        def calculate_excess_removal(model, WWTP, t):
+            return model.excess_removal[WWTP,t] == model.r[WWTP,t] - model.dis_minus_reg[WWTP,t]
+        
+        model.calculate_excess_removal = Constraint(model.WWTP, model.t, rule=calculate_excess_removal)
+
+        def check_buying_credits(model, WWTP, t):
+            #print('t:', t, 'ind_end_trading_market_year:', self.ind_end_trading_market_year)
+            if t <= self.ind_end_trading_market_year:
+                return model.status_buying[WWTP,t] == 0
+            else:
+                # if excess_removal is negative, then status_buying is 1
+                # if excess_removal is positive, then status_buying can be 0 or 1
+                # if excess_removal is zero, then status_buying can be 0 or 1
+                return (1 - model.status_buying[WWTP,t]) * model.excess_removal[WWTP, t] >= 0
+        
+        def check_buying_credits_2(model, WWTP, t):
+            if t <= self.ind_end_trading_market_year:
+                return Constraint.Skip
+            else:
+                # if excess_removal is positive, then status_buying is 0 
+                # if excess_removal is negative, then status_buying can be 0 or 1
+                # if excess_removal is zero, then status_buying can be 0 or 1
+                return model.status_buying[WWTP,t] * model.excess_removal[WWTP, t] <= 0
+            
+        # if required removal (discharge minus regulation) is negative or zero, then status_buying must be 0 (not buying)
+        def check_zero_removal(model, WWTP, t):
+            if model.dis_minus_reg[WWTP,t] > 0:
+                return Constraint.Skip
+            else:
+                return model.status_buying[WWTP,t] == 0
+                
+                
+        
+        model.check_buying_credits = Constraint(model.WWTP, model.t, rule=check_buying_credits)
+        model.check_buying_credits_2 = Constraint(model.WWTP, model.t, rule=check_buying_credits_2)
+        model.check_zero_removal = Constraint(model.WWTP, model.t, rule=check_zero_removal)
+
+        # Add trading ratio:
+        try:
+            TR = self.TR
+            print(f'Trading ratio (excess treatment to meet compliance): {TR:.1f}:1 Ratio')
+        except:
+            TR = 1
+            print(f'params["TR"] is not defined --> Assuming 1:1 Trading Ratio since')
+
+        def add_trading_ratio(model, t):
+            if t <= self.ind_end_trading_market_year:
+                return Constraint.Skip
+            else:
+                return sum((1- model.status_buying[WWTP,t]) * model.excess_removal[WWTP,t] for WWTP in model.WWTP) >= TR * sum(model.status_buying[WWTP2,t] * (-model.excess_removal[WWTP2,t]) for WWTP2 in model.WWTP)
+
+        if TR > 1:
+            model.trading_ratio_constraint = Constraint(model.t, rule=add_trading_ratio)
+        
+        return model
 
     def fix_capex_investment_constraints(self, model):
         """
@@ -599,7 +668,7 @@ class capacity_expansion():
         
         model.reg = Param(model.WWTP, model.t, initialize=reg_dict, mutable=True)
         model.dis = Param(model.WWTP, model.t, initialize=dis_dict, mutable=True)
-        model.dis_minus_reg = Param(model.WWTP, model.t, initialize=dis_minus_reg_dict, mutable=True)
+        model.dis_minus_reg = Param(model.WWTP, model.t, initialize=dis_minus_reg_dict, mutable=False)
 
         # Flow for each WWTP
         flow = pd.DataFrame(index=self.datetime, columns=df.index)
