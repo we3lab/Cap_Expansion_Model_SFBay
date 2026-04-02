@@ -1,0 +1,115 @@
+Solver command line: ['/home/sinan/miniconda3/envs/sfbaycap/bin/python']
+
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2548088
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Read LP format model from file /tmp/tmp70eg6c_d.pyomo.lp
+Reading time = 0.25 seconds
+x1: 38654 rows, 41825 columns, 310133 nonzeros
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 38654 rows, 41825 columns and 310133 nonzeros
+Model fingerprint: 0xedef7e36
+Model has 19440 quadratic constraints
+Variable types: 15905 continuous, 25920 integer (25920 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+00]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [7e+00, 1e+04]
+Presolve removed 12608 rows and 20364 columns
+Presolve time: 1.29s
+Presolved: 39963 rows, 29904 columns, 250045 nonzeros
+Presolved model has 4628 SOS constraint(s)
+Variable types: 15717 continuous, 14187 integer (14187 binary)
+Found heuristic solution: objective 912.0625580
+Deterministic concurrent LP optimizer: primal and dual simplex
+Showing primal log only...
+
+Concurrent spin time: 0.00s
+
+Solved with dual simplex
+
+Root relaxation: objective 5.313034e+01, 6923 iterations, 0.30 seconds (0.31 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   53.13034    0 2739  912.06256   53.13034  94.2%     -    4s
+H    0     0                     556.2904884   53.13034  90.4%     -    4s
+H    0     0                     556.1644476   53.13034  90.4%     -    4s
+     0     0   57.19963    0 2793  556.16445   57.19963  89.7%     -    6s
+H    0     0                     555.0329075   57.21211  89.7%     -    6s
+     0     0   57.21211    0 3064  555.03291   57.21211  89.7%     -    7s
+     0     0   63.63230    0 3662  555.03291   63.63230  88.5%     -   10s
+     0     0   63.64540    0 3614  555.03291   63.64540  88.5%     -   10s
+H    0     0                     481.5223528   63.64540  86.8%     -   11s
+     0     0   70.56168    0 3263  481.52235   70.56168  85.3%     -   12s
+H    0     0                     481.2226362   70.90390  85.3%     -   12s
+     0     0   72.78222    0 3297  481.22264   72.78222  84.9%     -   13s
+     0     0   72.80425    0 3303  481.22264   72.80425  84.9%     -   13s
+     0     0   99.50606    0 3490  481.22264   99.50606  79.3%     -   14s
+     0     0   99.50606    0 3490  481.22264   99.50606  79.3%     -   14s
+     0     0  100.06538    0 3172  481.22264  100.06538  79.2%     -   15s
+     0     0  103.50929    0 3568  481.22264  103.50929  78.5%     -   15s
+     0     0  103.74980    0 3586  481.22264  103.74980  78.4%     -   16s
+     0     0  106.71784    0 3614  481.22264  106.71784  77.8%     -   17s
+H    0     0                     473.4177385  106.72190  77.5%     -   17s
+     0     0  107.19962    0 3542  473.41774  107.19962  77.4%     -   17s
+     0     0  112.44099    0 3726  473.41774  112.44099  76.2%     -   18s
+     0     0  112.47455    0 3712  473.41774  112.47455  76.2%     -   18s
+H    0     0                     454.8394933  112.47455  75.3%     -   19s
+H    0     0                     437.7980137  112.47455  74.3%     -   19s
+H    0     0                     437.7914702  183.59328  58.1%     -   19s
+H    0     0                     437.7485028  183.59328  58.1%     -   19s
+H    0     2                     437.7440535  183.59328  58.1%     -   20s
+     0     2  183.59328    0 3707  437.74405  183.59328  58.1%     -   20s
+H   31    52                     437.6456493  197.45374  54.9%  1154   23s
+H   35    52                     435.7748232  197.45374  54.7%  1218   23s
+H   62    52                     432.4566925  200.18408  53.7%  1148   23s
+H   95   105                     432.4553619  200.41838  53.7%  1021   25s
+H  159   154                     424.2737340  200.41838  52.8%   829   29s
+H  187   154                     424.2084646  200.41838  52.8%   739   29s
+   191   194  370.99207   10   66  424.20846  200.41838  52.8%   731   30s
+H  500   382                     317.1720474  200.41838  36.8%   422   31s
+H  535   382                     315.8036690  200.41838  36.5%   411   31s
+  1479   848  236.45526   42  129  315.80367  200.41838  36.5%   264   35s
+H 3018  1558                     313.7048612  208.06004  33.7%   182   38s
+H 4291  1855                     312.0821899  208.06004  33.3%   149   40s
+  4292  1802  232.60384   16 2362  312.08219  208.06004  33.3%   149   65s
+H 4293  1712                     310.5243595  208.06004  33.0%   149   89s
+H 4293  1627                     310.5146763  208.06004  33.0%   149   89s
+H 4293  1545                     310.5099303  208.06004  33.0%   149   89s
+H 4293  1468                     310.4977645  230.56238  25.7%   149   89s
+  4297  1472  230.62019   13  940  310.49776  230.62019  25.7%   151   93s
+  4299  1473  309.25163   81  462  310.49776  230.62019  25.7%   151   97s
+  4303  1476  305.92610   55  722  310.49776  305.92610  1.47%   151  101s
+
+Cutting planes:
+  Gomory: 3
+  Cover: 10
+  Implied bound: 50
+  Projected implied bound: 13
+  Clique: 6
+  MIR: 20
+  Flow cover: 48
+  RLT: 16
+  Relax-and-lift: 80
+  BQP: 1
+
+Explored 4319 nodes (682901 simplex iterations) in 104.45 seconds (130.88 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 10: 310.498 310.498 310.51 ... 315.804
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.104977644693e+02, best bound 3.104886894503e+02, gap 0.0029%
+

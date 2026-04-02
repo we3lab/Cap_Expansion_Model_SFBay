@@ -1,0 +1,67 @@
+Solver command line: ['/home/sinan/miniconda3/envs/sfbaycap/bin/python']
+
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2548088
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Read LP format model from file /tmp/tmp6mcattko.pyomo.lp
+Reading time = 0.25 seconds
+x1: 39743 rows, 41792 columns, 308945 nonzeros
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 39743 rows, 41792 columns and 308945 nonzeros
+Model fingerprint: 0x2e324b28
+Model has 16911 quadratic constraints
+Variable types: 15905 continuous, 25887 integer (25887 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+00]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 8e+03]
+  QRHS range       [7e+00, 1e+04]
+Presolve removed 54804 rows and 28729 columns (presolve time = 6s) ...
+Presolve removed 30715 rows and 33995 columns
+Presolve time: 6.16s
+Presolved: 14095 rows, 11520 columns, 90044 nonzeros
+Presolved model has 2482 SOS constraint(s)
+Variable types: 6163 continuous, 5357 integer (5357 binary)
+Found heuristic solution: objective 711.1514348
+Found heuristic solution: objective 511.9740856
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -4.6265910e+02   5.410701e+05   0.000000e+00      8s
+    1537    3.9708348e+02   0.000000e+00   0.000000e+00      8s
+
+Root relaxation: objective 3.970835e+02, 1537 iterations, 0.02 seconds (0.03 work units)
+Total elapsed time = 7.53s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  397.08348    0  800  511.97409  397.08348  22.4%     -    8s
+     0     0  400.77461    0  514  511.97409  400.77461  21.7%     -    8s
+     0     0  400.77461    0  638  511.97409  400.77461  21.7%     -    8s
+     0     0  400.77461    0  422  511.97409  400.77461  21.7%     -    8s
+     0     0  400.77461    0  449  511.97409  400.77461  21.7%     -    8s
+H    0     0                     511.7898629  400.77461  21.7%     -    8s
+H    0     0                     477.0171050  400.77461  16.0%     -    8s
+
+Cutting planes:
+  RLT: 1
+
+Explored 1 nodes (2763 simplex iterations) in 8.59 seconds (8.62 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 4: 477.017 511.79 511.974 711.151 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.770171049688e+02, best bound 4.770171049688e+02, gap 0.0000%
+
