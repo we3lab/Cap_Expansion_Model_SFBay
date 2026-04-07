@@ -44,25 +44,49 @@ class capacity_expansion():
         output_path = self.figpath_base + 'solver_log.txt'
         
         # Solve MILP with gurobi
-        if self.solver_type == 'gurobi':
+        if self.solver_type == 'gurobi' and self.capex_costing_power is None or not len(self.capex_costing_power) > 0:
+            print('Using gurobi to solve the MILP')
             solver = SolverFactory('gurobi')
             solver.solve(model, tee=True, logfile=output_path)
         
-
+        # Solve MILP with gurobi_direct
+        elif self.solver_type == 'gurobi' and self.capex_costing_power is not None and len(self.capex_costing_power) > 0:
+            print('Using gurobi direct to solve the MILP with power law capex costing')
+            self.solver_type = 'gurobi_direct'
+            #solver = SolverFactory('gurobi', solver_io='nl')
+            solver = SolverFactory('gurobi_direct')
+            solver.options['NonConvex'] = 2  # allows nonlinear/nonconvex terms
+            solver.solve(model, tee=True, logfile=output_path)
+        
         # Solve LP with ipopt
-        if self.solver_type == 'ipopt':
+        elif self.solver_type == 'ipopt':
             solver = SolverFactory('ipopt')
             solver.solve(model, tee=True)
         
         
         # Solve with MindtPy
-        if self.solver_type == 'mindtpy':
+        elif self.solver_type == 'mindtpy':
             solver = SolverFactory('mindtpy')
             solver.solve(model, 
                         mip_solver = 'gurobi',
                         nlp_solver = 'ipopt',
                         tee=True)
+        else:
+            print('Solver not recognized. Please select either gurobi, ipopt, or mindtpy')
+            return None
+
+        model = self.print_results(model)
+
+        # compute unit costs for partial coordination figure if required
+
+        if self.unit_cost_analysis and self.Constraint_tag == 'Partial_coordination':
+            
+            print('Computing unit costs for partial coordination')
+            model = self.compute_unit_costs_WWTP(model, solver)
         
+        return model
+    
+    def print_results(self, model):
         print('Policy Scenario:', self.Constraint_tag)
         print('Staged Infrastructure:', self.staged_infrastructure)
         print('Projected Discharge Multiplier:', self.projection_multiplier)
@@ -148,17 +172,8 @@ class capacity_expansion():
                 results_econ[L+'_opex'] = [model.opex_yearly_NPV[WWTP,L,year].value for year in model.years]
             results_econ.to_csv(self.figpath +'results_econ_'+WWTP+'.csv')
             
-        
-        # compute unit costs for partial coordination figure if required
-
-        if self.unit_cost_analysis and self.Constraint_tag == 'Partial_coordination':
-            
-            print('Computing unit costs for partial coordination')
-            model = self.compute_unit_costs_WWTP(model, solver)
-        
         return model
     
-
     def build(self):
         """
         Builds the optimization model for WWTP:
@@ -255,6 +270,13 @@ class capacity_expansion():
         LB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
         UB_max = {(i, upgrade): df.loc[i, upgrade_bound_max_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
 
+        # Find UB_max for all upgrades:
+        self.x_max_allupgrades = max(
+            UB_max[(i, upgrade)]
+            for upgrade in self.L
+            for i in self.WWTP
+        )
+
         model.UB = Param(model.WWTP, model.L, initialize=UB, mutable=True)
         model.LB = Param(model.WWTP, model.L, initialize=LB, mutable=True)
 
@@ -308,10 +330,15 @@ class capacity_expansion():
         
         #tags
         capex_tags = {'SS': self.capex_SS_tag, 'L2': self.capex_L2_tag, 'L2upg3': self.capex_L2upg3_tag, 'L3': self.capex_L3_tag}    
+        capex_tags_power = {'SS': 0, 'L2': self.capex_L2_power_tag, 'L2upg3': self.capex_L2upg3_power_tag, 'L3': self.capex_L3_power_tag}
 
-        # capital cost (D*x + E)
-        model.D = {(i, upgrade) : df.loc[i, capex_tags[upgrade][0]] for upgrade in self.L for i in self.WWTP}
-        model.E = {(i, upgrade) : df.loc[i, capex_tags[upgrade][1]] for upgrade in self.L for i in self.WWTP}
+        # if linear: capital cost (D*x + E)
+        model.D = {(i, upgrade) : df.loc[i, capex_tags[upgrade][0]] for upgrade in model.L for i in self.WWTP}
+        model.E = {(i, upgrade) : df.loc[i, capex_tags[upgrade][1]] for upgrade in model.L for i in self.WWTP}
+
+        # if power law: capital costs (alpha* x^beta)
+        model.alpha = {(i, upgrade) : df.loc[i, capex_tags_power[upgrade][0]] if upgrade in self.capex_costing_power else 0 for upgrade in model.L for i in self.WWTP}
+        model.beta = {(i, upgrade) : df.loc[i, capex_tags_power[upgrade][1]] if upgrade in self.capex_costing_power else 0 for upgrade in model.L for i in self.WWTP}
 
         return model
     
@@ -964,6 +991,7 @@ class capacity_expansion():
             for j in [0,1]:
                 df.loc[i, self.opex_L2upg3_tag[j]] = df.loc[i, self.opex_L3_tag[j]]
                 df.loc[i, self.capex_L2upg3_tag[j]] = df.loc[i, self.capex_L3_tag[j]]
+                df.loc[i, self.capex_L2upg3_power_tag[j]] = df.loc[i, self.capex_L3_power_tag[j]]
                 df.loc[i, self.bounds_L2upg3_tag[j]] = df.loc[i, self.bounds_L3_tag[j]]                                      
                 df.loc[i, self.bounds_L2upg3_max_tag[j]] = df.loc[i, self.bounds_L3_max_tag[j]]                              
         return df
@@ -1021,7 +1049,7 @@ class capacity_expansion():
         model.capex_yearly_NPV = Var(model.WWTP, model.L, model.t, initialize=0)
         model.capex_NPV = Var(model.WWTP, model.L, initialize=0)
         
-        def capex_monthly_cond(model, WWTP, L, t):
+        def capex_monthly_cond_linear(model, WWTP, L, t):
             if L == 'L2upg3':
                 return model.capex_monthly[WWTP, 'L2upg3',t] == (
                     model.u[WWTP,'L2upg3',t] * 
@@ -1032,6 +1060,19 @@ class capacity_expansion():
                 return model.capex_monthly[WWTP, L, t] == (
                     model.u[WWTP,L,t] * 
                     (model.D[WWTP,L] * model.x_max[WWTP,L] + model.E[WWTP,L])
+                    )
+        
+        def capex_monthly_cond_power(model, WWTP, L, t):
+            if L == 'L2upg3':
+                return model.capex_monthly[WWTP, 'L2upg3',t] == (
+                    model.u[WWTP,'L2upg3',t] * 
+                    ((model.alpha[WWTP,'L2upg3'] * model.x_max[WWTP,'L2upg3']**model.beta[WWTP,'L2upg3']) -
+                    (model.alpha[WWTP,'L2'] * model.x_max[WWTP,'L2']**model.beta[WWTP,'L2']))
+                    )
+            else:
+                return model.capex_monthly[WWTP, L, t] == (
+                    model.u[WWTP,L,t] * 
+                    (model.alpha[WWTP,L] * model.x_max[WWTP,L]**model.beta[WWTP,L])
                     )
         
         def capex_yearly_NPV_cond(model, WWTP, L, years):
@@ -1047,7 +1088,15 @@ class capacity_expansion():
         
 
         
-        model.capex_monthly_cond = Constraint(model.WWTP, model.L, model.t, rule=capex_monthly_cond)   
+        
+        # check that self.capex_costing_linear is not an empty list
+        if self.capex_costing_linear is not None and len(self.capex_costing_linear) > 0:
+            print('Assuming linear capital cost for upgrades:', self.capex_costing_linear)
+            model.capex_monthly_cond_linear = Constraint(model.WWTP, self.capex_costing_linear, model.t, rule=capex_monthly_cond_linear)   
+        if self.capex_costing_power is not None and len(self.capex_costing_power) > 0:
+            print('Assuming power law capital cost for upgrades:', self.capex_costing_power)
+            model.capex_monthly_cond_power = Constraint(model.WWTP, self.capex_costing_power, model.t, rule=capex_monthly_cond_power)
+        
         model.capex_yearly_NPV_cond = Constraint(model.WWTP, model.L, model.years, rule=capex_yearly_NPV_cond)
         model.capex_NPV_cond = Constraint(model.WWTP, model.L, rule=capex_NPV_cond)      
         
