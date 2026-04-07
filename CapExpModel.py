@@ -424,7 +424,7 @@ class capacity_expansion():
             # only unfix integer variables when the upgrade needs to be built
             for WWTP in model.WWTP:
                 ## find when the upgrade needs to be operated (when discharge exceeds regulation)
-                t_operate = np.where(np.array(model.dis_minus_reg[WWTP,:]()) > 0)[0][0]
+                t_operate = np.where(np.array([value(model.dis_minus_reg[WWTP, t]) for t in model.t]) > 0)[0][0]
                 ## unfix upgrade for when the upgrade needs to be built
                 t_build = t_operate - 12 * self.time_to_build_yr 
                 model.u[WWTP,:,t_build].unfix()
