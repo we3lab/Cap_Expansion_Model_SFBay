@@ -147,18 +147,18 @@ class capacity_expansion():
                 
                 removal = np.zeros(len(model.t))
                 conc = np.zeros(len(model.t))
-                SS_conc_lim = np.ones(len(model.t)) * model.SS_rem_per[WWTP]() * 100
+                SS_conc_lim = np.ones(len(model.t)) * model.SS_rem_per[WWTP] * 100
                 L2_per_lim = np.ones(len(model.t)) * 15
                 L3_per_lim = np.ones(len(model.t)) * 6
                 for t in model.t:
                     if model.status[WWTP,L,t]() > 0:
                         removal[t] = (model.x[WWTP,L,t]())/ model.dis[WWTP, t]() * 100
                         conc[t] = (model.dis[WWTP, t]() - model.x[WWTP,L,t]())/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL       
-                    SS_conc_lim[t] = (model.dis[WWTP, t]() * (1- model.SS_rem_per[WWTP]()))/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
+                    SS_conc_lim[t] = (model.dis[WWTP, t]() * (1- model.SS_rem_per[WWTP]))/ model.flow[WWTP,t]() * self.lbNpermgd_to_mgNperL
                     L2_per_lim[t] = (model.dis[WWTP,t]() - L2_per_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
                     L3_per_lim[t] = (model.dis[WWTP,t]() - L3_per_lim[t] * model.flow[WWTP,t]()/ self.lbNpermgd_to_mgNperL)/ model.dis[WWTP, t]() * 100
                 results[L+'_per_removal'] = removal
-            results['SS_per_lim'] = np.ones(len(model.t)) * model.SS_rem_per[WWTP]() * 100
+            results['SS_per_lim'] = np.ones(len(model.t)) * model.SS_rem_per[WWTP] * 100
             results['L2_per_lim'] = L2_per_lim
             results['L3_per_lim'] = L3_per_lim
             results['SS_conc_lim'] = SS_conc_lim
@@ -176,7 +176,7 @@ class capacity_expansion():
                 results_flow['Influent_load'] = [model.dis[WWTP,t].value for t in model.t]
                 results_flow['Influent_conc'] = [model.influent_conc[WWTP,t].value for t in model.t]
                 results_flow['Total_removal'] = [model.r[WWTP,t].value for t in model.t]
-                
+                results_flow['Effluenct_conc'] = [(model.dis[WWTP,t].value - model.r[WWTP,t].value)/model.flow[WWTP,t].value * self.lbNpermgd_to_mgNperL for t in model.t] 
                 for L in model.L:
                     results_flow[L+'_r'] = [model.status[WWTP,L,t].value * model.x[WWTP,L,t].value for t in model.t]
                     results_flow[L+'_x_flow'] = [model.x_flow[WWTP,L,t].value for t in model.t]
@@ -305,7 +305,7 @@ class capacity_expansion():
         # define time-dependent bounds for each upgrade
         
         SS_rem_per = {i: df.loc[i, self.SS_per_removal_tag] for i in self.WWTP}
-        model.SS_rem_per = Param(model.WWTP, initialize=SS_rem_per, mutable=True)
+        model.SS_rem_per = Param(model.WWTP, initialize=SS_rem_per, mutable=False)
         
 
 
@@ -958,7 +958,12 @@ class capacity_expansion():
         def flow_upgrade_constraint(model, WWTP, L, t):
             if L == 'SS':
                 # SS can treat the entire flow of the WWTP 
-                return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.flow[WWTP, t]
+                #return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.flow[WWTP, t]
+                if model.dis_minus_reg[WWTP,t] > 0 and model.SS_rem_per[WWTP] > 0:
+                    return model.x_flow[WWTP, L, t] == (model.status[WWTP, L, t] * model.x[WWTP, L, t] / model.SS_rem_per[WWTP]) * (1/ model.dis[WWTP, t]) * model.flow[WWTP, t]
+                else:
+                    return model.x_flow[WWTP, L, t] == 0
+                # model.SS_rem_per[WWTP] * model.dis[WWTP, t]
             elif L == 'L2':
                 # L2 can treat the flow to remove up enough TIN to reach an effluent of 15 mg/L of TN
                 return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.x[WWTP, L, t] / (model.influent_conc[WWTP, t]- 15) * self.lbNpermgd_to_mgNperL
