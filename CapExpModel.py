@@ -100,6 +100,7 @@ class capacity_expansion():
                     #print('\t',L+':', round(model.x_max[WWTP,L](),2),'; Lower bound (' + str(model.LB[WWTP, L].value)+ '); Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
                     print('\t',L+':', round(model.x_max[WWTP,L](),2), '(' + str(round(max(model.x[WWTP,L,t].value for t in model.t),1)) + ')',
                           '; Capex:',round(model.capex_NPV[WWTP,L](),2), '; Opex:', round(model.opex_NPV[WWTP,L](),2))
+                    print(f'\t\t Max flow capacity: {round(model.x_flow_max[WWTP, L](),2)} mgd; Flow capacity used: {round(max(model.x_flow[WWTP,L,t].value for t in model.t),2)} mgd')
                 else:
                     print('\t',L+': not built', round(model.capex_NPV[WWTP,L](),2))
         
@@ -109,11 +110,13 @@ class capacity_expansion():
         summary['Total_capex'] = [sum(model.capex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Total_opex'] = [sum(model.opex_NPV[WWTP,L].value for L in model.L) for WWTP in model.WWTP]
         summary['Max_capacity'] = [sum(sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for L in model.L) - model.x_max[WWTP, 'L2'].value * sum(model.u[WWTP,'L2upg3',t].value for t in model.t) for WWTP in model.WWTP]
+        summary['Max_flow_capacity'] = [sum(sum(model.u[WWTP,L,t].value for t in model.t) * model.x_flow_max[WWTP,L].value for L in model.L) - model.x_flow_max[WWTP, 'L2'].value * sum(model.u[WWTP,'L2upg3',t].value for t in model.t) for WWTP in model.WWTP]
         summary['Total_removal'] = [sum(model.r[WWTP,t].value for t in model.t) for WWTP in model.WWTP]
         for L in model.L:
             summary[L+'_capex_NPV'] = [model.capex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_opex_NPV'] = [model.opex_NPV[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_x_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_max[WWTP,L].value for WWTP in model.WWTP]
+            summary[L+'_x_flow_max'] = [sum(model.u[WWTP,L,t].value for t in model.t) * model.x_flow_max[WWTP,L].value for WWTP in model.WWTP]
             summary[L+'_removal'] = [sum(model.x[WWTP,L,t].value * model.status[WWTP,L,t].value for t in model.t) for WWTP in model.WWTP]
 
         summary.loc['Total'] = summary.sum()
@@ -164,6 +167,20 @@ class capacity_expansion():
 
             results.to_csv(self.figpath +'results_'+WWTP+'.csv')
 
+            # print flow results
+            for WWTP in model.WWTP:
+                #print TIN removal results
+                results_flow = pd.DataFrame(index=self.datetime)
+                results_flow['Required_removal'] =[value(model.dis_minus_reg[WWTP,t]) for t in model.t]
+                results_flow['Influent_flow'] = [model.flow[WWTP,t].value for t in model.t]
+                results_flow['Influent_load'] = [model.dis[WWTP,t].value for t in model.t]
+                results_flow['Influent_conc'] = [model.influent_conc[WWTP,t].value for t in model.t]
+                results_flow['Total_removal'] = [model.r[WWTP,t].value for t in model.t]
+                
+                for L in model.L:
+                    results_flow[L+'_r'] = [model.status[WWTP,L,t].value * model.x[WWTP,L,t].value for t in model.t]
+                    results_flow[L+'_x_flow'] = [model.x_flow[WWTP,L,t].value for t in model.t]
+                results_flow.to_csv(self.figpath +'results_flow_'+WWTP+'.csv')
 
             # print individual economic WWTP results
             results_econ = pd.DataFrame(index=self.datetime_years)
@@ -215,6 +232,7 @@ class capacity_expansion():
         # Add constraints
         model = self.add_capacity_constraints(model)
         #model = self.add_regulatory_constraints(model, self.Constraint_tag)
+        model = self.add_flow_capacity_constraints(model)
         model = self.add_max_capacity_constraints(model)
         model = self.add_build_upgrade_constraint(model)
         model = self.add_integer_constraints(model)
@@ -313,9 +331,11 @@ class capacity_expansion():
             return model.LB_max[WWTP, L]
 
         model.x = Var(model.WWTP, model.L, model.t, bounds=fb, initialize=x_init)    # total nitrogen removed by each facility at each timestep
+        model.x_flow = Var(model.WWTP, model.L, model.t, bounds=(0,None), initialize=0)    # flow diverted into each upgrade in each facility at each timestep (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
 
         if self.Constraint_tag == 'No_coordination':
             model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Maximum nitrogen removed by each facility by each upgrade
+            model.x_flow_max = Var(model.WWTP, model.L, bounds=(0,None), initialize=0)    # Maximum flow that can be diverted into each upgrade in each facility (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
         
         model.r = Var(model.WWTP, model.t, initialize=0)                      # total nitrogen removed by each facility at each timestep
 
@@ -594,6 +614,7 @@ class capacity_expansion():
                 
                 # redefine x_max
                 model.x_max = Var(model.WWTP, model.L, bounds=fb_max, initialize=x_max_init)    # Maximum nitrogen removed by each facility by each upgrade
+                model.x_flow_max = Var(model.WWTP, model.L, bounds=(0,None), initialize=0)    # Maximum flow that can be diverted into each upgrade in each facility (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
                 model = self.add_integer_variables(model)
                 model = self.set_integer_variables(model)
                 return model
@@ -613,6 +634,7 @@ class capacity_expansion():
         model.zeta = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade build is completed')
         model.status = Var(model.WWTP, model.L, model.t, within=Binary, initialize= 0, doc='Binary variable that determines when an upgrade is operated after built is completed')
         model.x_max = Var(model.WWTP, model.L, initialize= x_max_fix, bounds=fb_max, doc='Maximum nitrogen removed by each facility by each upgrade')
+        model.x_flow_max = Var(model.WWTP, model.L, bounds=(0,None), initialize=0)    # Maximum flow that can be diverted into each upgrade in each facility (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
 
         for t in range(0, ind_end-1):
             model.z[:,:,t].fix()
@@ -710,6 +732,9 @@ class capacity_expansion():
         
         flow_dict = {(WWTP,t): flow[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
         model.flow = Param(model.WWTP, model.t, initialize=flow_dict, mutable=True)
+
+        influent_conc_dict = {(WWTP,t): discharge[WWTP].iloc[t] / flow[WWTP].iloc[t] * self.lbNpermgd_to_mgNperL for t in model.t for WWTP in self.WWTP}
+        model.influent_conc = Param(model.WWTP, model.t, initialize=influent_conc_dict, mutable=True)
 
         # define max amount of removal by each upgrade
         L2_bound_discharge = pd.DataFrame(index=self.datetime, columns=df.index)
@@ -921,6 +946,42 @@ class capacity_expansion():
         model.find_z = Constraint(model.WWTP, model.L, model.t, rule=find_z)
 
         return model
+    
+    
+    def add_flow_capacity_constraints(self, model):
+        """
+        Add flow capacity constraints to the model
+        This function calculates the maximum flow that can be diverted into each upgrade in each facility (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
+        """
+
+        # Function that calculates the flow that can be diverted into each upgrade in each facility (assuming upgrade operates at full operational capacity ex. 6 mg/L or 15 mg/L)
+        def flow_upgrade_constraint(model, WWTP, L, t):
+            if L == 'SS':
+                # SS can treat the entire flow of the WWTP 
+                return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.flow[WWTP, t]
+            elif L == 'L2':
+                # L2 can treat the flow to remove up enough TIN to reach an effluent of 15 mg/L of TN
+                return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.x[WWTP, L, t] / (model.influent_conc[WWTP, t]- 15) * self.lbNpermgd_to_mgNperL
+                #return Constraint.Skip
+            elif L == 'L3':
+                # L3 can treat the flow to remove up enough TIN to reach an effluent of 6 mg/L of TN
+                return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.x[WWTP, L, t] / (model.influent_conc[WWTP, t]- 6) * self.lbNpermgd_to_mgNperL
+                #return Constraint.Skip
+            elif L == 'L2upg3':
+                # L2upg3 can treat the flow to remove up enough TIN to reach an effluent of 6 mg/L of TN
+                return model.x_flow[WWTP, L, t] == model.status[WWTP, L, t] * model.x[WWTP, L, t] / (model.influent_conc[WWTP, t]- 6) * self.lbNpermgd_to_mgNperL
+                #return Constraint.Skip
+
+        model.flow_upgrade_constraint = Constraint(model.WWTP, model.L, model.t, rule=flow_upgrade_constraint)
+
+        # Constraint that max removal has to be greater than current removal
+        def max_flow_capacity(model, WWTP, L, t):
+            return model.x_flow_max[WWTP, L] >= model.x_flow[WWTP,L,t]
+        
+        model.max_flow_capacity = Constraint(model.WWTP, model.L, model.t, rule=max_flow_capacity)
+        
+        return model
+    
     
     
     
