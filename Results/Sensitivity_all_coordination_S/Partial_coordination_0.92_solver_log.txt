@@ -1,0 +1,53 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp_km9zd1r.pyomo.lp
+Reading time = 0.10 seconds
+x1: 47117 rows, 33947 columns, 61667 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47117 rows, 33947 columns and 61667 nonzeros (Min)
+Model fingerprint: 0x50278a67
+Model has 1 linear objective coefficients
+Model has 19267 quadratic constraints
+Variable types: 20233 continuous, 13714 integer (13714 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 6e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [9e+00, 1e+04]
+
+Presolve removed 44987 rows and 30718 columns
+Presolve time: 0.03s
+Presolved: 6377 rows, 6135 columns, 14518 nonzeros
+Presolved model has 1434 SOS constraint(s)
+Variable types: 2951 continuous, 3184 integer (2189 binary)
+Performing another presolve...
+Presolve removed 6367 rows and 6124 columns
+Presolve time: 0.09s
+Found heuristic solution: objective 304.7594540
+Found heuristic solution: objective 304.7544303
+
+Root relaxation: objective 3.046279e+02, 7 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  304.62792    0    1  304.75443  304.62792  0.04%     -    0s
+H    0     0                     304.6279240  304.62792  0.00%     -    0s
+     0     0  304.62792    0    1  304.62792  304.62792  0.00%     -    0s
+
+Explored 1 nodes (7 simplex iterations) in 0.15 seconds (0.07 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 3: 304.628 304.754 304.759 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.046279239817e+02, best bound 3.046279239817e+02, gap 0.0000%
+

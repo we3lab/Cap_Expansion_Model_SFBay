@@ -1,0 +1,46 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp7x23cu_k.pyomo.lp
+Reading time = 0.09 seconds
+x1: 47156 rows, 33948 columns, 62066 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47156 rows, 33948 columns and 62066 nonzeros (Min)
+Model fingerprint: 0x7991b8a8
+Model has 1 linear objective coefficients
+Model has 19248 quadratic constraints
+Variable types: 20234 continuous, 13714 integer (13714 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 3e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 9e+03]
+  QRHS range       [7e+00, 1e+04]
+
+Presolve removed 45193 rows and 30947 columns
+Presolve time: 0.02s
+Presolved: 5958 rows, 5695 columns, 13509 nonzeros
+Presolved model has 1326 SOS constraint(s)
+Variable types: 2709 continuous, 2986 integer (2031 binary)
+Found heuristic solution: objective 236.7877550
+Performing another presolve...
+Presolve removed 5950 rows and 5686 columns
+Presolve time: 0.07s
+Found heuristic solution: objective 226.7144581
+
+Root relaxation: cutoff, 0 iterations, 0.00 seconds (0.00 work units)
+
+Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.06 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 2: 226.714 236.788 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.267144581320e+02, best bound 2.267144581320e+02, gap 0.0000%
+

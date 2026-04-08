@@ -1,0 +1,67 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp8rw_9rd4.pyomo.lp
+Reading time = 0.18 seconds
+x1: 44943 rows, 46124 columns, 318465 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 44943 rows, 46124 columns and 318465 nonzeros (Min)
+Model fingerprint: 0x95457ec7
+Model has 1 linear objective coefficients
+Model has 20346 quadratic constraints
+Variable types: 20237 continuous, 25887 integer (25887 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 5e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 9e+03]
+  QRHS range       [2e+00, 1e+04]
+
+Presolve removed 25799 rows and 32826 columns
+Presolve time: 0.48s
+Presolved: 29322 rows, 21455 columns, 209501 nonzeros
+Presolved model has 4520 SOS constraint(s)
+Variable types: 9302 continuous, 12153 integer (12152 binary)
+Performing another presolve...
+Presolve removed 34305 rows and 21404 columns (presolve time = 5s)...
+Presolve removed 23717 rows and 17240 columns
+Presolve time: 5.49s
+Found heuristic solution: objective 802.7445996
+Found heuristic solution: objective 753.3956413
+Found heuristic solution: objective 661.8958545
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.9735411e+02   1.875811e+03   0.000000e+00      6s
+    3354    4.2337022e+02   0.000000e+00   0.000000e+00      6s
+
+Root relaxation: objective 4.233702e+02, 3354 iterations, 0.06 seconds (0.08 work units)
+Total elapsed time = 6.25s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  423.37022    0  795  661.89585  423.37022  36.0%     -    6s
+H    0     0                     659.8859226  423.37022  35.8%     -    6s
+H    0     0                     657.7623549  423.37022  35.6%     -    6s
+H    0     0                     657.7616952  423.37022  35.6%     -    6s
+H    0     0                     569.8242457  423.37022  25.7%     -    6s
+
+Cutting planes:
+  RLT: 2
+
+Explored 1 nodes (3452 simplex iterations) in 6.73 seconds (7.51 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 6: 569.824 657.762 659.886 ... 802.745
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 5.698242457416e+02, best bound 5.697999951076e+02, gap 0.0043%
+

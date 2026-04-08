@@ -1,56 +1,64 @@
-Solver command line: ['/home/sinan/miniconda3/envs/sfbaycap/bin/python']
+Solver command line: []
 
-Set parameter WLSAccessID
-Set parameter WLSSecret
-Set parameter LicenseID to value 2548088
-Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Read LP format model from file /tmp/tmp6qtz8yjn.pyomo.lp
-Reading time = 0.22 seconds
-x1: 40274 rows, 37946 columns, 222202 nonzeros
-Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+Read LP format model from file /tmp/tmp2_o8_o2n.pyomo.lp
+Reading time = 0.16 seconds
+x1: 45484 rows, 42278 columns, 231732 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
 CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
 Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 40274 rows, 37946 columns and 222202 nonzeros
-Model fingerprint: 0x58961eff
-Model has 17356 quadratic constraints
-Variable types: 15902 continuous, 22044 integer (22044 binary)
+Optimize a model with 45484 rows, 42278 columns and 231732 nonzeros (Min)
+Model fingerprint: 0x6f5de522
+Model has 1 linear objective coefficients
+Model has 20786 quadratic constraints
+Variable types: 20234 continuous, 22044 integer (22044 binary)
 Coefficient statistics:
   Matrix range     [6e-01, 3e+03]
-  QMatrix range    [2e-05, 1e+00]
+  QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+04]
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
-Presolve removed 25832 rows and 25702 columns
-Presolve time: 0.48s
-Presolved: 23223 rows, 17777 columns, 103713 nonzeros
-Presolved model has 3062 SOS constraint(s)
-Variable types: 10722 continuous, 7055 integer (7055 binary)
-Found heuristic solution: objective 797.3744587
-Found heuristic solution: objective 576.2106126
 
-Root relaxation: objective 2.409513e+02, 2346 iterations, 0.04 seconds (0.05 work units)
+Presolve removed 31227 rows and 32105 columns
+Presolve time: 0.11s
+Presolved: 22535 rows, 16927 columns, 120811 nonzeros
+Presolved model has 3588 SOS constraint(s)
+Variable types: 7286 continuous, 9641 integer (8299 binary)
+Found heuristic solution: objective 817.3485237
+Found heuristic solution: objective 779.1229859
+Performing another presolve...
+Presolve removed 14244 rows and 10657 columns
+Presolve time: 0.91s
+Found heuristic solution: objective 779.0076741
+
+Root relaxation: objective 2.409513e+02, 2140 iterations, 0.03 seconds (0.03 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  240.95132    0  320  576.21061  240.95132  58.2%     -    1s
-     0     0  242.32417    0  322  576.21061  242.32417  57.9%     -    1s
-     0     0  242.37984    0  317  576.21061  242.37984  57.9%     -    1s
-H    0     0                     334.0606231  242.37984  27.4%     -    1s
-H    0     0                     334.0430065  242.37984  27.4%     -    1s
-     0     0  245.96870    0  560  334.04301  245.96870  26.4%     -    1s
-H    0     0                     324.1330765  245.96870  24.1%     -    2s
+     0     0  240.95132    0  367  779.00767  240.95132  69.1%     -    1s
+     0     0  242.32417    0  712  779.00767  242.32417  68.9%     -    1s
+     0     0  242.44852    0  564  779.00767  242.44852  68.9%     -    1s
+H    0     0                     523.5283077  242.44852  53.7%     -    1s
+H    0     0                     513.9899457  242.44852  52.8%     -    1s
+H    0     0                     329.3284211  242.44852  26.4%     -    2s
+H    0     0                     329.1673470  242.44852  26.3%     -    2s
+H    0     0                     325.7113349  242.44852  25.6%     -    2s
+H    0     0                     325.6376160  242.44852  25.5%     -    2s
+H    0     0                     325.6355552  242.44852  25.5%     -    2s
+H    0     0                     325.6329913  242.44852  25.5%     -    2s
+H    0     0                     324.1206399  242.44852  25.2%     -    2s
+     0     0  248.47956    0  298  324.12064  248.47956  23.3%     -    2s
 
-Explored 1 nodes (3875 simplex iterations) in 2.25 seconds (2.24 work units)
+Explored 1 nodes (3638 simplex iterations) in 2.89 seconds (2.42 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 6: 324.133 324.14 334.043 ... 797.374
+Solution count 10: 324.121 324.121 325.633 ... 523.528
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 3.241330765034e+02, best bound 3.241186922680e+02, gap 0.0044%
+Best objective 3.241206398899e+02, best bound 3.241206398899e+02, gap 0.0000%
 

@@ -1,44 +1,55 @@
-Solver command line: ['/Users/sinanabifarraj/miniconda3/envs/sfbaycap/bin/python']
+Solver command line: []
 
-Set parameter WLSAccessID
-Set parameter WLSSecret
-Set parameter LicenseID to value 2548088
-Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Read LP format model from file /var/folders/c4/xftw48qx1ln6q3hxvkc80tdw0000gn/T/tmpnzt2ue1w.pyomo.lp
-Reading time = 0.07 seconds
-x1: 40018 rows, 27455 columns, 49518 nonzeros
-Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[rosetta2] - Darwin 24.5.0 24F74)
+Read LP format model from file /tmp/tmpiv4oa6h3.pyomo.lp
+Reading time = 0.10 seconds
+x1: 47098 rows, 33947 columns, 61998 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
-CPU model: Apple M2
-Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 40018 rows, 27455 columns and 49518 nonzeros
-Model fingerprint: 0xf1745861
-Model has 13686 quadratic constraints
-Variable types: 14820 continuous, 12635 integer (12635 binary)
+Optimize a model with 47098 rows, 33947 columns and 61998 nonzeros (Min)
+Model fingerprint: 0x56192cbd
+Model has 1 linear objective coefficients
+Model has 19276 quadratic constraints
+Variable types: 20232 continuous, 13715 integer (13715 binary)
 Coefficient statistics:
   Matrix range     [6e-01, 3e+03]
-  QMatrix range    [2e-05, 1e+00]
+  QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+04]
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
-Presolve removed 32886 rows and 21641 columns
-Presolve time: 0.02s
-Presolved: 13357 rows, 9466 columns, 33684 nonzeros
-Presolved model has 2008 SOS constraint(s)
-Variable types: 6812 continuous, 2654 integer (2648 binary)
-Found heuristic solution: objective 553.2225808
 
-Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
+Presolve removed 44514 rows and 29783 columns
+Presolve time: 0.03s
+Presolved: 8355 rows, 8656 columns, 19366 nonzeros
+Presolved model has 2558 SOS constraint(s)
+Variable types: 4516 continuous, 4140 integer (3213 binary)
+Found heuristic solution: objective 567.5563207
+Found heuristic solution: objective 558.9953100
+Performing another presolve...
+Presolve removed 8343 rows and 8642 columns
+Presolve time: 0.18s
+Found heuristic solution: objective 553.4743309
+Found heuristic solution: objective 553.4715279
 
-Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.10 work units)
-Thread count was 8 (of 8 available processors)
+Root relaxation: objective 5.532201e+02, 5 iterations, 0.00 seconds (0.00 work units)
 
-Solution count 1: 553.223 
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  553.22012    0    3  553.47153  553.22012  0.05%     -    0s
+H    0     0                     553.3996500  553.22012  0.03%     -    0s
+H    0     0                     553.2225808  553.22012  0.00%     -    0s
+
+Explored 1 nodes (5 simplex iterations) in 0.26 seconds (0.10 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 6: 553.223 553.4 553.472 ... 567.556
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 5.532225808320e+02, best bound 5.532060578670e+02, gap 0.0030%
+Best objective 5.532225808320e+02, best bound 5.532201223387e+02, gap 0.0004%
 

@@ -1,61 +1,79 @@
-Solver command line: ['/Users/sinanabifarraj/miniconda3/envs/sfbaycap/bin/python']
+Solver command line: []
 
-Set parameter WLSAccessID
-Set parameter WLSSecret
-Set parameter LicenseID to value 2548088
-Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Read LP format model from file /var/folders/c4/xftw48qx1ln6q3hxvkc80tdw0000gn/T/tmp2gmeayyk.pyomo.lp
-Reading time = 0.14 seconds
-x1: 38056 rows, 35786 columns, 218904 nonzeros
-Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (mac64[rosetta2] - Darwin 24.5.0 24F74)
+Read LP format model from file /tmp/tmp85f7ipwf.pyomo.lp
+Reading time = 0.16 seconds
+x1: 45484 rows, 42278 columns, 231732 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
-CPU model: Apple M2
-Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 38056 rows, 35786 columns and 218904 nonzeros
-Model fingerprint: 0xaba49c22
-Model has 15648 quadratic constraints
-Variable types: 14822 continuous, 20964 integer (20964 binary)
+Optimize a model with 45484 rows, 42278 columns and 231732 nonzeros (Min)
+Model fingerprint: 0x2adddf60
+Model has 1 linear objective coefficients
+Model has 20542 quadratic constraints
+Variable types: 20234 continuous, 22044 integer (22044 binary)
 Coefficient statistics:
   Matrix range     [6e-01, 3e+03]
-  QMatrix range    [2e-05, 1e+00]
+  QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+04]
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
-Presolve removed 24169 rows and 24296 columns
-Presolve time: 0.32s
-Presolved: 21708 rows, 16205 columns, 100148 nonzeros
-Presolved model has 2526 SOS constraint(s)
-Variable types: 9700 continuous, 6505 integer (6505 binary)
-Found heuristic solution: objective 796.9068638
 
-Root relaxation: objective 2.319715e+02, 2036 iterations, 0.02 seconds (0.04 work units)
+Presolve removed 31227 rows and 32105 columns
+Presolve time: 0.10s
+Presolved: 22405 rows, 16927 columns, 120156 nonzeros
+Presolved model has 3588 SOS constraint(s)
+Variable types: 7286 continuous, 9641 integer (8299 binary)
+Found heuristic solution: objective 899.7356660
+Found heuristic solution: objective 775.3136108
+Performing another presolve...
+Presolve removed 14227 rows and 10738 columns
+Presolve time: 0.85s
+
+Root relaxation: objective 2.325866e+02, 2748 iterations, 0.03 seconds (0.04 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  231.97145    0  491  796.90686  231.97145  70.9%     -    1s
-H    0     0                     585.5745136  231.97145  60.4%     -    1s
-H    0     0                     318.4986944  231.97145  27.2%     -    1s
-H    0     0                     318.3452388  231.97145  27.1%     -    1s
-     0     0  240.81535    0  134  318.34524  240.81535  24.4%     -    1s
-H    0     0                     318.0168858  240.81535  24.3%     -    1s
-     0     0  242.72641    0    2  318.01689  242.72641  23.7%     -    1s
-H    0     0                     316.5406556  242.72641  23.3%     -    1s
-     0     0          -    0       316.54066  316.53816  0.00%     -    1s
+     0     0  232.58662    0  444  775.31361  232.58662  70.0%     -    1s
+H    0     0                     490.2490033  232.58662  52.6%     -    1s
+H    0     0                     490.2405093  232.58662  52.6%     -    1s
+     0     0  239.49185    0  703  490.24051  239.49185  51.1%     -    2s
+H    0     0                     490.1390271  239.50714  51.1%     -    2s
+H    0     0                     490.0307669  239.50714  51.1%     -    2s
+H    0     0                     490.0235400  239.50714  51.1%     -    2s
+H    0     0                     489.8979975  239.50714  51.1%     -    2s
+     0     0  239.50714    0  701  489.89800  239.50714  51.1%     -    2s
+H    0     0                     489.7267248  240.46087  50.9%     -    2s
+     0     0  240.48795    0  696  489.72672  240.48795  50.9%     -    2s
+     0     0  240.48795    0  692  489.72672  240.48795  50.9%     -    2s
+H    0     0                     489.6815772  240.48795  50.9%     -    2s
+H    0     0                     489.6724608  240.48795  50.9%     -    2s
+H    0     0                     484.7831957  240.48795  50.4%     -    2s
+H    0     0                     484.7686053  240.48795  50.4%     -    2s
+     0     0  250.85921    0  743  484.76861  250.85921  48.3%     -    2s
+H    0     0                     319.5658999  250.85921  21.5%     -    2s
+H    0     0                     319.5603741  262.18986  18.0%     -    2s
+     0     0  262.18986    0  392  319.56037  262.18986  18.0%     -    2s
+     0     0  314.70096    0  261  319.56037  314.70096  1.52%     -    2s
+     0     0  315.76148    0   67  319.56037  315.76148  1.19%     -    2s
+     0     0  316.54063    0   53  319.56037  316.54063  0.94%     -    2s
+     0     0  316.54063    0    8  319.56037  316.54063  0.94%     -    2s
+H    0     0                     319.5529707  316.54063  0.94%     -    3s
+     0     0  316.54063    0   46  319.55297  316.54063  0.94%     -    3s
+     0     0  316.54063    0   35  319.55297  316.54063  0.94%     -    3s
+H    0     0                     318.0168858  316.54063  0.46%     -    3s
+H    0     0                     316.5406556  316.54063  0.00%     -    3s
 
-Cutting planes:
-  Implied bound: 3
-  Flow cover: 1
+Explored 1 nodes (6557 simplex iterations) in 3.12 seconds (2.57 work units)
+Thread count was 32 (of 80 available processors)
 
-Explored 1 nodes (3487 simplex iterations) in 1.34 seconds (1.90 work units)
-Thread count was 8 (of 8 available processors)
-
-Solution count 6: 316.541 318.017 318.345 ... 796.907
+Solution count 10: 316.541 316.541 318.017 ... 489.672
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 3.165406556179e+02, best bound 3.165381591030e+02, gap 0.0008%
+Best objective 3.165406556179e+02, best bound 3.165406267311e+02, gap 0.0000%
 

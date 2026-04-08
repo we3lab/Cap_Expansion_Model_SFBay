@@ -1,0 +1,66 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp22g8nj1j.pyomo.lp
+Reading time = 0.19 seconds
+x1: 44935 rows, 46124 columns, 318457 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 44935 rows, 46124 columns and 318457 nonzeros (Min)
+Model fingerprint: 0x040b5af7
+Model has 1 linear objective coefficients
+Model has 20350 quadratic constraints
+Variable types: 20237 continuous, 25887 integer (25887 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 3e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [8e+00, 1e+04]
+
+Presolve removed 25769 rows and 32790 columns
+Presolve time: 0.48s
+Presolved: 29363 rows, 21513 columns, 209620 nonzeros
+Presolved model has 4524 SOS constraint(s)
+Variable types: 9340 continuous, 12173 integer (12172 binary)
+Performing another presolve...
+Presolve removed 34439 rows and 21543 columns (presolve time = 8s)...
+Presolve removed 23825 rows and 17367 columns
+Presolve time: 7.64s
+Found heuristic solution: objective 825.6701830
+Found heuristic solution: objective 734.1703962
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    4.6922287e+02   2.204265e+03   0.000000e+00      8s
+    3173    4.9978829e+02   0.000000e+00   0.000000e+00      8s
+
+Root relaxation: objective 4.997883e+02, 3173 iterations, 0.05 seconds (0.07 work units)
+Total elapsed time = 8.37s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  499.78829    0  813  734.17040  499.78829  31.9%     -    8s
+H    0     0                     732.0580885  499.78829  31.7%     -    8s
+H    0     0                     648.6750115  499.78829  23.0%     -    8s
+H    0     0                     645.5075300  499.78829  22.6%     -    8s
+H    0     0                     645.4816123  499.78829  22.6%     -    8s
+
+Cutting planes:
+  RLT: 1
+
+Explored 1 nodes (3278 simplex iterations) in 8.84 seconds (9.22 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 5: 645.482 648.675 732.058 ... 825.67
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.454816122811e+02, best bound 6.454501180089e+02, gap 0.0049%
+
