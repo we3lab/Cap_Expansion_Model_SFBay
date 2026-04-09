@@ -691,8 +691,20 @@ class capacity_expansion():
                 raise SystemExit('specify how to calculate current discharge')
             
             projected = df.loc[i, self.discharge_BACWA_projected_tag] * self.projection_multiplier
-            discharge[i] = np.linspace(current, projected, 
-                                            len(self.datetime), endpoint=True) 
+            if self.projected_flow_assumption == 'linear':
+                discharge[i] = np.linspace(current, projected, 
+                                            len(self.datetime), endpoint=True)
+            elif self.projected_flow_assumption == 'exponential':
+                growth_rate_annual = (projected / current)**(1/len(self.datetime_years)) - 1
+                #discharge[i] = current * (1 + growth_rate_annual) ** (self.datetime.year - self.datetime.year[0])
+                discharge_linear = np.linspace(current, projected, len(self.datetime), endpoint=True)
+                projected_final_step = np.where(self.datetime == '2054-09-01')[0][0]
+                projected_new = discharge_linear[projected_final_step]
+                growth_rate_monthly = (projected_new / current)**(1/len(self.datetime[:projected_final_step])) - 1
+                discharge[i] = current * (1 + growth_rate_monthly) ** (np.arange(len(self.datetime)))
+            else:
+                raise SystemExit('specify params["projected_flow_assumption"] as linear or exponential')
+        
         # regulations for each WWTP
         regulations = pd.DataFrame(index=self.datetime, columns=df.index)
         for i in model.WWTP:
@@ -727,8 +739,19 @@ class capacity_expansion():
             else:
                 current = df.loc[i, self.flow_BACWA_current_tag]                                      # use BACWA for flow
             projected = df.loc[i, self.flow_BACWA_projected_tag] * self.projection_multiplier
-            flow[i] = np.linspace(current, projected, 
-                                            len(self.datetime), endpoint=True) 
+            if self.projected_flow_assumption == 'linear':
+                flow[i] = np.linspace(current, projected, len(self.datetime), endpoint=True)
+            elif self.projected_flow_assumption == 'exponential':
+                growth_rate_annual = (projected / current)**(1/len(self.datetime_years)) - 1
+                #flow[i] = current * (1 + growth_rate_annual) ** (self.datetime.year - self.datetime.year[0])
+                growth_rate_monthly = (projected / current)**(1/len(self.datetime)) - 1
+                flow_linear = np.linspace(current, projected, len(self.datetime), endpoint=True)
+                projected_final_step = np.where(self.datetime == '2054-09-01')[0][0]
+                projected_new = flow_linear[projected_final_step]
+                growth_rate_monthly = (projected_new / current)**(1/len(self.datetime[:projected_final_step])) - 1
+                flow[i] = current * (1 + growth_rate_monthly) ** (np.arange(len(self.datetime)))
+            else:
+                raise SystemExit('specify params["projected_flow_assumption"] as linear or exponential') 
         
         flow_dict = {(WWTP,t): flow[WWTP].iloc[t] for t in model.t for WWTP in self.WWTP}
         model.flow = Param(model.WWTP, model.t, initialize=flow_dict, mutable=True)
