@@ -156,10 +156,10 @@ if __name__ == "__main__":
     
         if staged_scenario == "Non_staged":
             params["staged_infrastructure"]= False
-            params["version_num"] = 'Staged_Power_law_NS'
+            params["version_num"] = 'Power_law_NS'
         elif staged_scenario == "Staged":
             params["staged_infrastructure"]= True
-            params["version_num"] = 'Staged_Power_law_S'
+            params["version_num"] = 'Power_law_S'
         
         
         # Initialize parameters
