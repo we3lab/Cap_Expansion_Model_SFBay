@@ -20,7 +20,7 @@
     "include_SS": true,
     "use_NPDES_for_current_TN_discharge": false,
     "use_ECHO_for_current_TN_discharge": true,
-    "projected_flow_assumption": "exponential",
+    "projected_flow_assumption": "linear",
     "only_opex_trading": false,
     "discount_rate": 0.02,
     "total_years" : 30,
