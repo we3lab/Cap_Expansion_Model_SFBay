@@ -1,7 +1,7 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmp7x23cu_k.pyomo.lp
-Reading time = 0.09 seconds
+Read LP format model from file /tmp/tmpdcs8p8qa.pyomo.lp
+Reading time = 0.10 seconds
 x1: 47156 rows, 33948 columns, 62066 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 47156 rows, 33948 columns and 62066 nonzeros (Min)
-Model fingerprint: 0x7991b8a8
+Model fingerprint: 0x365a8cb1
 Model has 1 linear objective coefficients
 Model has 19248 quadratic constraints
 Variable types: 20234 continuous, 13714 integer (13714 binary)
@@ -19,24 +19,24 @@ Coefficient statistics:
   QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 9e+03]
   QRHS range       [7e+00, 1e+04]
 
-Presolve removed 45193 rows and 30947 columns
+Presolve removed 45036 rows and 30953 columns
 Presolve time: 0.02s
-Presolved: 5958 rows, 5695 columns, 13509 nonzeros
+Presolved: 6112 rows, 5686 columns, 13814 nonzeros
 Presolved model has 1326 SOS constraint(s)
-Variable types: 2709 continuous, 2986 integer (2031 binary)
+Variable types: 2709 continuous, 2977 integer (2028 binary)
 Found heuristic solution: objective 236.7877550
 Performing another presolve...
-Presolve removed 5950 rows and 5686 columns
-Presolve time: 0.07s
+Presolve removed 6104 rows and 5677 columns
+Presolve time: 0.09s
 Found heuristic solution: objective 226.7144581
 
 Root relaxation: cutoff, 0 iterations, 0.00 seconds (0.00 work units)
 
-Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.06 work units)
+Explored 1 nodes (0 simplex iterations) in 0.14 seconds (0.06 work units)
 Thread count was 32 (of 80 available processors)
 
 Solution count 2: 226.714 236.788 

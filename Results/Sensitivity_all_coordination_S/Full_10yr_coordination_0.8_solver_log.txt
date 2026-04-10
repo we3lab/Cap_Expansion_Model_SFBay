@@ -1,7 +1,7 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpc99xstre.pyomo.lp
-Reading time = 0.17 seconds
+Read LP format model from file /tmp/tmpsqjj6x_c.pyomo.lp
+Reading time = 0.15 seconds
 x1: 45584 rows, 42279 columns, 232192 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 45584 rows, 42279 columns and 232192 nonzeros (Min)
-Model fingerprint: 0x4ace94e4
+Model fingerprint: 0x0c93069c
 Model has 1 linear objective coefficients
 Model has 20492 quadratic constraints
 Variable types: 20235 continuous, 22044 integer (22044 binary)
@@ -19,45 +19,54 @@ Coefficient statistics:
   QMatrix range    [2e-05, 1e+02]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 8e+03]
   QRHS range       [6e-01, 1e+04]
 
-Presolve removed 31698 rows and 32424 columns
-Presolve time: 0.12s
-Presolved: 21614 rows, 15772 columns, 119468 nonzeros
-Presolved model has 2886 SOS constraint(s)
-Variable types: 6294 continuous, 9478 integer (7815 binary)
+Presolve removed 31617 rows and 32434 columns
+Presolve time: 0.10s
+Presolved: 21684 rows, 15754 columns, 119426 nonzeros
+Presolved model has 2880 SOS constraint(s)
+Variable types: 6285 continuous, 9469 integer (7804 binary)
 Found heuristic solution: objective 793.9259244
+Found heuristic solution: objective 793.4422894
 Found heuristic solution: objective 451.0445703
 Performing another presolve...
-Presolve removed 13952 rows and 9974 columns
-Presolve time: 0.97s
+Presolve removed 14106 rows and 9947 columns
+Presolve time: 0.95s
 Found heuristic solution: objective 450.7662268
 
-Root relaxation: objective 2.041725e+02, 2301 iterations, 0.03 seconds (0.03 work units)
+Root relaxation: objective 2.040931e+02, 2600 iterations, 0.04 seconds (0.06 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  204.17254    0  689  450.76623  204.17254  54.7%     -    1s
-H    0     0                     450.6897727  204.17254  54.7%     -    1s
-H    0     0                     213.8193269  204.17254  4.51%     -    1s
-H    0     0                     212.7170905  204.17254  4.02%     -    1s
-H    0     0                     212.5247514  204.17254  3.93%     -    1s
+     0     0  204.09313    0  525  450.76623  204.09313  54.7%     -    1s
+H    0     0                     450.6897727  204.09313  54.7%     -    1s
+H    0     0                     292.6537910  204.09313  30.3%     -    1s
+     0     0  209.68057    0  243  292.65379  209.68057  28.4%     -    2s
+     0     0  209.68057    0  164  292.65379  209.68057  28.4%     -    2s
+H    0     0                     222.2366267  209.68057  5.65%     -    2s
+H    0     0                     212.7152875  209.68057  1.43%     -    2s
+H    0     0                     212.5904315  209.68057  1.37%     -    2s
+H    0     0                     212.5837383  209.68057  1.37%     -    2s
+*    0     0               0     212.5247514  212.52475  0.00%     -    3s
 
 Cutting planes:
-  Learned: 5
-  Implied bound: 5
+  Learned: 6
+  Gomory: 1
+  Cover: 55
+  Implied bound: 3
+  Clique: 13
   MIR: 5
-  Flow cover: 18
-  Relax-and-lift: 8
+  Flow cover: 60
+  Relax-and-lift: 37
 
-Explored 1 nodes (3259 simplex iterations) in 2.07 seconds (2.01 work units)
+Explored 1 nodes (4922 simplex iterations) in 3.01 seconds (2.74 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 8: 212.525 212.717 213.819 ... 793.926
+Solution count 10: 212.525 212.584 212.59 ... 450.766
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 2.125247513990e+02, best bound 2.125247513990e+02, gap 0.0000%
+Best objective 2.125247513990e+02, best bound 2.125247513989e+02, gap 0.0000%
 

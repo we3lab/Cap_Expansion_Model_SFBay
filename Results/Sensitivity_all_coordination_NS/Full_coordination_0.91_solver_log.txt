@@ -1,0 +1,59 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp9vxaflws.pyomo.lp
+Reading time = 0.11 seconds
+x1: 47115 rows, 42209 columns, 93959 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47115 rows, 42209 columns and 93959 nonzeros (Min)
+Model fingerprint: 0xf10c10dc
+Model has 1 linear objective coefficients
+Model has 19269 quadratic constraints
+Variable types: 20237 continuous, 21972 integer (21972 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [9e+00, 1e+04]
+
+Presolve removed 34850 rows and 32962 columns
+Presolve time: 0.04s
+Presolved: 22065 rows, 16429 columns, 48881 nonzeros
+Presolved model has 3994 SOS constraint(s)
+Variable types: 7125 continuous, 9304 integer (7768 binary)
+Found heuristic solution: objective 320.8911921
+Performing another presolve...
+Presolve removed 19326 rows and 14190 columns
+Presolve time: 0.54s
+
+Root relaxation: objective 9.229644e+01, 1333 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   92.29644    0  121  221.26080   92.29644  58.3%     -    0s
+     0     0  173.13641    0  167  221.26080  173.13641  21.8%     -    0s
+     0     0  219.29304    0   49  221.26080  219.29304  0.89%     -    0s
+     0     0  220.75286    0   32  221.26080  220.75286  0.23%     -    0s
+     0     0  220.81279    0   26  221.26080  220.81279  0.20%     -    0s
+H    0     0                     220.8779344  220.81279  0.03%     -    0s
+
+Cutting planes:
+  Implied bound: 2
+  Relax-and-lift: 21
+
+Explored 1 nodes (2224 simplex iterations) in 0.78 seconds (0.48 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 3: 220.878 221.261 320.891 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.208779344288e+02, best bound 2.208779344288e+02, gap 0.0000%
+

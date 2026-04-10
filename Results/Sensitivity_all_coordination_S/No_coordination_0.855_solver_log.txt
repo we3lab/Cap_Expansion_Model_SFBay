@@ -1,7 +1,7 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpvy460u64.pyomo.lp
-Reading time = 0.20 seconds
+Read LP format model from file /tmp/tmp92isnhry.pyomo.lp
+Reading time = 0.18 seconds
 x1: 45009 rows, 46124 columns, 318531 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 45009 rows, 46124 columns and 318531 nonzeros (Min)
-Model fingerprint: 0x68a1a120
+Model fingerprint: 0xc6981e8c
 Model has 1 linear objective coefficients
 Model has 20313 quadratic constraints
 Variable types: 20237 continuous, 25887 integer (25887 binary)
@@ -19,64 +19,47 @@ Coefficient statistics:
   QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [6e-01, 6e+03]
   QRHS range       [7e+00, 1e+04]
 
-Presolve removed 28993 rows and 33315 columns
-Presolve time: 0.68s
-Presolved: 26043 rows, 20710 columns, 199589 nonzeros
+Presolve removed 28900 rows and 33318 columns
+Presolve time: 0.64s
+Presolved: 26136 rows, 20707 columns, 199746 nonzeros
 Presolved model has 4484 SOS constraint(s)
-Variable types: 8845 continuous, 11865 integer (11865 binary)
+Variable types: 8845 continuous, 11862 integer (11862 binary)
 Found heuristic solution: objective 733.5675833
-Found heuristic solution: objective 618.7705717
+Found heuristic solution: objective 618.4607677
 Performing another presolve...
-Presolve removed 30124 rows and 20418 columns (presolve time = 5s)...
-Presolve removed 19856 rows and 16405 columns
-Presolve time: 5.15s
+Presolve removed 20029 rows and 16402 columns
+Presolve time: 4.96s
 Found heuristic solution: objective 352.7452097
 
 Root simplex log...
 
 Iteration    Objective       Primal Inf.    Dual Inf.      Time
-       0   -7.0945711e+02   6.897904e+05   0.000000e+00      6s
-    2616    2.1296769e+02   0.000000e+00   0.000000e+00      6s
+       0   -4.4957299e+02   5.401412e+05   0.000000e+00      6s
+    2367    2.1660228e+02   0.000000e+00   0.000000e+00      6s
 
-Root relaxation: objective 2.129677e+02, 2616 iterations, 0.10 seconds (0.17 work units)
-Total elapsed time = 6.12s (DegenMoves)
+Root relaxation: objective 2.166023e+02, 2367 iterations, 0.08 seconds (0.13 work units)
+Total elapsed time = 5.88s (DegenMoves)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  212.96769    0  570  352.74521  212.96769  39.6%     -    6s
-H    0     0                     350.5883469  212.96769  39.3%     -    6s
-H    0     0                     344.3682065  212.96769  38.2%     -    7s
-     0     0  236.15532    0  761  344.36821  236.15532  31.4%     -    7s
-     0     0  236.15532    0  557  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  464  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  348  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  338  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  520  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  350  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  372  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  503  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  341  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  338  344.36821  236.15532  31.4%     -    9s
-     0     0  236.15532    0  502  344.36821  236.15532  31.4%     -    9s
-H    0     0                     338.4939262  236.15532  30.2%     -   10s
-H    0     0                     238.8635370  238.74768  0.05%     -   10s
+     0     0  216.60228    0  399  352.74521  216.60228  38.6%     -    6s
+     0     0  238.44992    0   58  352.74521  238.44992  32.4%     -    6s
+     0     0  238.86354    0   39  352.74521  238.86354  32.3%     -    6s
+H    0     0                     346.7066744  238.86354  31.1%     -    6s
+H    0     0                     344.5921030  238.86354  30.7%     -    7s
+H    0     0                     342.5189939  238.86354  30.3%     -    7s
+     0     0  238.86354    0   50  342.51899  238.86354  30.3%     -    7s
+*    0     0               0     238.8635370  238.86354  0.00%     -    8s
 
-Cutting planes:
-  Learned: 10
-  Gomory: 2
-  Cover: 90
-  Clique: 279
-  RLT: 1
-
-Explored 1 nodes (6575 simplex iterations) in 10.60 seconds (11.27 work units)
+Explored 1 nodes (3434 simplex iterations) in 8.17 seconds (9.52 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 10: 238.864 338.494 344.368 ... 733.568
+Solution count 7: 238.864 342.519 344.592 ... 733.568
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 2.388635370434e+02, best bound 2.388635370434e+02, gap 0.0000%

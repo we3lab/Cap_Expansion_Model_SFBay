@@ -1,6 +1,6 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpmuv328bd.pyomo.lp
+Read LP format model from file /tmp/tmpf8i4tgxt.pyomo.lp
 Reading time = 0.10 seconds
 x1: 47186 rows, 33948 columns, 62096 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 47186 rows, 33948 columns and 62096 nonzeros (Min)
-Model fingerprint: 0x6eafc316
+Model fingerprint: 0xfa377668
 Model has 1 linear objective coefficients
 Model has 19233 quadratic constraints
 Variable types: 20234 continuous, 13714 integer (13714 binary)
@@ -19,26 +19,26 @@ Coefficient statistics:
   QMatrix range    [2e-05, 7e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 8e+03]
   QRHS range       [1e+00, 1e+04]
 
-Presolve removed 45293 rows and 31058 columns
-Presolve time: 0.03s
-Presolved: 5754 rows, 5510 columns, 13018 nonzeros
-Presolved model has 1300 SOS constraint(s)
-Variable types: 2615 continuous, 2895 integer (1970 binary)
+Presolve removed 45150 rows and 31068 columns
+Presolve time: 0.02s
+Presolved: 5880 rows, 5487 columns, 13265 nonzeros
+Presolved model has 1292 SOS constraint(s)
+Variable types: 2603 continuous, 2884 integer (1961 binary)
 Found heuristic solution: objective 234.6647951
 Performing another presolve...
-Presolve removed 5746 rows and 5504 columns
-Presolve time: 0.07s
-Found heuristic solution: objective 223.7610654
+Presolve removed 5872 rows and 5479 columns
+Presolve time: 0.06s
+Found heuristic solution: objective 223.7497617
 Found heuristic solution: objective 223.5050061
 
-Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.06 work units)
+Explored 1 nodes (0 simplex iterations) in 0.11 seconds (0.06 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 3: 223.505 223.761 234.665 
+Solution count 3: 223.505 223.75 234.665 
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 2.235050061453e+02, best bound 2.235050061453e+02, gap 0.0000%

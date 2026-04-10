@@ -1,7 +1,7 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmp35vbjgf2.pyomo.lp
-Reading time = 0.12 seconds
+Read LP format model from file /tmp/tmpjh2wq0j2.pyomo.lp
+Reading time = 0.13 seconds
 x1: 46930 rows, 38197 columns, 138743 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 46930 rows, 38197 columns and 138743 nonzeros (Min)
-Model fingerprint: 0x6456fa71
+Model fingerprint: 0xbc334a6f
 Model has 1 linear objective coefficients
 Model has 18736 quadratic constraints
 Variable types: 20233 continuous, 17964 integer (17964 binary)
@@ -19,22 +19,22 @@ Coefficient statistics:
   QMatrix range    [2e-05, 3e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
 
-Presolve removed 42633 rows and 33606 columns
-Presolve time: 0.03s
-Presolved: 8549 rows, 7976 columns, 31776 nonzeros
+Presolve removed 42534 rows and 33606 columns
+Presolve time: 0.04s
+Presolved: 8648 rows, 7976 columns, 31974 nonzeros
 Presolved model has 1762 SOS constraint(s)
 Variable types: 3374 continuous, 4602 integer (3618 binary)
-Found heuristic solution: objective 587.1674779
-Found heuristic solution: objective 491.6115794
+Found heuristic solution: objective 585.3662544
+Found heuristic solution: objective 492.4978008
 Performing another presolve...
-Presolve removed 8310 rows and 7692 columns
-Presolve time: 0.09s
-Found heuristic solution: objective 487.5103120
-Found heuristic solution: objective 484.2962218
+Presolve removed 8409 rows and 7692 columns
+Presolve time: 0.13s
+Found heuristic solution: objective 488.3965335
+Found heuristic solution: objective 485.0087569
 
 Root relaxation: objective 4.750629e+02, 178 iterations, 0.00 seconds (0.00 work units)
 
@@ -44,10 +44,10 @@ Root relaxation: objective 4.750629e+02, 178 iterations, 0.00 seconds (0.00 work
 H    0     0                     475.0628937  475.06289  0.00%     -    0s
      0     0  475.06289    0   41  475.06289  475.06289  0.00%     -    0s
 
-Explored 1 nodes (178 simplex iterations) in 0.18 seconds (0.14 work units)
+Explored 1 nodes (178 simplex iterations) in 0.22 seconds (0.14 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 5: 475.063 484.296 487.51 ... 587.167
+Solution count 5: 475.063 485.009 488.397 ... 585.366
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 4.750628936646e+02, best bound 4.750628936646e+02, gap 0.0000%

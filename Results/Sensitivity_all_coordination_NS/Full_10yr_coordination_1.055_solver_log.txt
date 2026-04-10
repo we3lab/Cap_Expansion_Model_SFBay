@@ -1,0 +1,52 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmpbb9eozln.pyomo.lp
+Reading time = 0.10 seconds
+x1: 47432 rows, 39582 columns, 82216 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47432 rows, 39582 columns and 82216 nonzeros (Min)
+Model fingerprint: 0x7d561c1b
+Model has 1 linear objective coefficients
+Model has 18587 quadratic constraints
+Variable types: 20232 continuous, 19350 integer (19350 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 2e+04]
+  QRHS range       [1e+01, 1e+04]
+
+Presolve removed 37477 rows and 31239 columns
+Presolve time: 0.04s
+Presolved: 19733 rows, 15798 columns, 43112 nonzeros
+Presolved model has 4038 SOS constraint(s)
+Variable types: 7318 continuous, 8480 integer (6636 binary)
+Found heuristic solution: objective 694.0764863
+Found heuristic solution: objective 692.7571289
+Performing another presolve...
+Presolve removed 19721 rows and 15783 columns
+Presolve time: 0.18s
+Found heuristic solution: objective 692.0831273
+
+Root relaxation: interrupted, 8 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0          -    0       692.08313  692.01464  0.01%     -    0s
+
+Explored 1 nodes (8 simplex iterations) in 0.30 seconds (0.16 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 4: 692.083 692.281 692.757 694.076 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.920831272773e+02, best bound 6.920146404128e+02, gap 0.0099%
+

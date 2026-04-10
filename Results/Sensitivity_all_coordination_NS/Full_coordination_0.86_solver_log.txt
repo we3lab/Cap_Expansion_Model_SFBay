@@ -1,0 +1,52 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmprkx7cmhc.pyomo.lp
+Reading time = 0.11 seconds
+x1: 47145 rows, 42209 columns, 93989 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47145 rows, 42209 columns and 93989 nonzeros (Min)
+Model fingerprint: 0x241cd7dc
+Model has 1 linear objective coefficients
+Model has 19254 quadratic constraints
+Variable types: 20237 continuous, 21972 integer (21972 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 4e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [2e-01, 1e+04]
+  QRHS range       [2e+00, 1e+04]
+
+Presolve removed 36345 rows and 33681 columns
+Presolve time: 0.04s
+Presolved: 20121 rows, 15318 columns, 44524 nonzeros
+Presolved model has 3882 SOS constraint(s)
+Variable types: 6752 continuous, 8566 integer (7288 binary)
+Found heuristic solution: objective 314.8550581
+Performing another presolve...
+Presolve removed 19167 rows and 14410 columns
+Presolve time: 0.14s
+
+Root relaxation: objective 2.132172e+02, 429 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  213.21722    0   52  216.99081  213.21722  1.74%     -    0s
+     0     0  216.85783    0   25  216.99081  216.85783  0.06%     -    0s
+*    0     0               0     216.9369573  216.93696  0.00%     -    0s
+
+Explored 1 nodes (674 simplex iterations) in 0.27 seconds (0.24 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 4: 216.937 216.991 217.178 314.855 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.169369573426e+02, best bound 2.169369573426e+02, gap 0.0000%
+

@@ -1,6 +1,6 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmp1ej9huby.pyomo.lp
+Read LP format model from file /tmp/tmpnd44_97t.pyomo.lp
 Reading time = 0.10 seconds
 x1: 47156 rows, 33948 columns, 62066 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 47156 rows, 33948 columns and 62066 nonzeros (Min)
-Model fingerprint: 0x9dc337ca
+Model fingerprint: 0xdc20d655
 Model has 1 linear objective coefficients
 Model has 19248 quadratic constraints
 Variable types: 20234 continuous, 13714 integer (13714 binary)
@@ -19,28 +19,28 @@ Coefficient statistics:
   QMatrix range    [2e-05, 4e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 9e+03]
   QRHS range       [2e+00, 1e+04]
 
-Presolve removed 45193 rows and 30943 columns
+Presolve removed 45036 rows and 30953 columns
 Presolve time: 0.02s
-Presolved: 5968 rows, 5707 columns, 13531 nonzeros
-Presolved model has 1332 SOS constraint(s)
-Variable types: 2718 continuous, 2989 integer (2036 binary)
+Presolved: 6114 rows, 5688 columns, 13818 nonzeros
+Presolved model has 1328 SOS constraint(s)
+Variable types: 2712 continuous, 2976 integer (2029 binary)
 Found heuristic solution: objective 236.9451198
 Performing another presolve...
-Presolve removed 5960 rows and 5698 columns
+Presolve removed 6106 rows and 5679 columns
 Presolve time: 0.07s
-Found heuristic solution: objective 226.8615692
+Found heuristic solution: objective 226.8511403
 
-Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: cutoff, 0 iterations, 0.00 seconds (0.00 work units)
 
 Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.06 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 2: 226.862 236.945 
+Solution count 2: 226.851 236.945 
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 2.268615692461e+02, best bound 2.268500703684e+02, gap 0.0051%
+Best objective 2.268511402722e+02, best bound 2.268511402722e+02, gap 0.0000%
 

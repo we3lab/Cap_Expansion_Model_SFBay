@@ -1,0 +1,50 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp_wndknz_.pyomo.lp
+Reading time = 0.11 seconds
+x1: 47195 rows, 42209 columns, 94039 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47195 rows, 42209 columns and 94039 nonzeros (Min)
+Model fingerprint: 0x5d764f9c
+Model has 1 linear objective coefficients
+Model has 19229 quadratic constraints
+Variable types: 20237 continuous, 21972 integer (21972 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 8e+03]
+  QRHS range       [6e-01, 1e+04]
+
+Presolve removed 38351 rows and 34690 columns
+Presolve time: 0.04s
+Presolved: 17530 rows, 13801 columns, 38734 nonzeros
+Presolved model has 3746 SOS constraint(s)
+Variable types: 6273 continuous, 7528 integer (6608 binary)
+Found heuristic solution: objective 308.2863711
+Performing another presolve...
+Presolve removed 16666 rows and 13012 columns
+Presolve time: 0.10s
+
+Root relaxation: objective 2.124441e+02, 88 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0          -    0       212.52475  212.50584  0.01%     -    0s
+
+Explored 1 nodes (129 simplex iterations) in 0.21 seconds (0.21 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 2: 212.525 308.286 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.125247513990e+02, best bound 2.125058439241e+02, gap 0.0089%
+

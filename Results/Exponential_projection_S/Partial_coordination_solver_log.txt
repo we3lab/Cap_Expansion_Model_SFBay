@@ -1,7 +1,7 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpd1743g9u.pyomo.lp
-Reading time = 0.09 seconds
+Read LP format model from file /tmp/tmpkb1elue5.pyomo.lp
+Reading time = 0.10 seconds
 x1: 47128 rows, 33946 columns, 61318 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 47128 rows, 33946 columns and 61318 nonzeros (Min)
-Model fingerprint: 0xd7a7e2eb
+Model fingerprint: 0x8ab216de
 Model has 1 linear objective coefficients
 Model has 19261 quadratic constraints
 Variable types: 20232 continuous, 13714 integer (13714 binary)
@@ -19,19 +19,21 @@ Coefficient statistics:
   QMatrix range    [2e-05, 2e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 1e+04]
   QRHS range       [4e+00, 1e+04]
 
-Presolve removed 45111 rows and 30623 columns
+Presolve removed 44928 rows and 30613 columns
 Presolve time: 0.03s
-Presolved: 6676 rows, 6852 columns, 15424 nonzeros
-Presolved model has 2008 SOS constraint(s)
-Variable types: 3654 continuous, 3198 integer (2525 binary)
-Found heuristic solution: objective 468.8296922
+Presolved: 6862 rows, 6869 columns, 15806 nonzeros
+Presolved model has 2010 SOS constraint(s)
+Variable types: 3657 continuous, 3212 integer (2531 binary)
+Found heuristic solution: objective 471.1160483
+Found heuristic solution: objective 468.9626701
+Found heuristic solution: objective 468.3049087
 Performing another presolve...
-Presolve removed 6666 rows and 6843 columns
-Presolve time: 0.13s
+Presolve removed 6852 rows and 6860 columns
+Presolve time: 0.12s
 Found heuristic solution: objective 461.8509967
 
 Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
@@ -39,7 +41,7 @@ Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
 Explored 1 nodes (0 simplex iterations) in 0.19 seconds (0.08 work units)
 Thread count was 32 (of 80 available processors)
 
-Solution count 2: 461.851 468.83 
+Solution count 4: 461.851 468.305 468.963 471.116 
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 4.618509966798e+02, best bound 4.618457972646e+02, gap 0.0011%

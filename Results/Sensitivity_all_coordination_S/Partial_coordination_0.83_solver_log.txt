@@ -1,6 +1,6 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpq_9omded.pyomo.lp
+Read LP format model from file /tmp/tmp04yeg9df.pyomo.lp
 Reading time = 0.10 seconds
 x1: 47170 rows, 33948 columns, 62080 nonzeros
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
@@ -10,7 +10,7 @@ Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
 Optimize a model with 47170 rows, 33948 columns and 62080 nonzeros (Min)
-Model fingerprint: 0xb0703ff5
+Model fingerprint: 0x6a1b1cc6
 Model has 1 linear objective coefficients
 Model has 19241 quadratic constraints
 Variable types: 20234 continuous, 13714 integer (13714 binary)
@@ -19,23 +19,23 @@ Coefficient statistics:
   QMatrix range    [2e-05, 4e+01]
   QLMatrix range   [2e-02, 4e+02]
   Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+04]
+  Bounds range     [2e-01, 1e+04]
   RHS range        [1e+00, 9e+03]
   QRHS range       [2e+00, 1e+04]
 
-Presolve removed 45244 rows and 30986 columns
-Presolve time: 0.02s
-Presolved: 5889 rows, 5643 columns, 13336 nonzeros
+Presolve removed 45092 rows and 30988 columns
+Presolve time: 0.03s
+Presolved: 6040 rows, 5640 columns, 13637 nonzeros
 Presolved model has 1330 SOS constraint(s)
-Variable types: 2690 continuous, 2953 integer (2016 binary)
+Variable types: 2690 continuous, 2950 integer (2015 binary)
 Found heuristic solution: objective 236.1828185
 Performing another presolve...
-Presolve removed 5881 rows and 5637 columns
-Presolve time: 0.06s
+Presolve removed 6032 rows and 5632 columns
+Presolve time: 0.08s
 Found heuristic solution: objective 225.2065814
 Found heuristic solution: objective 224.9456183
 
-Explored 1 nodes (0 simplex iterations) in 0.12 seconds (0.06 work units)
+Explored 1 nodes (0 simplex iterations) in 0.14 seconds (0.06 work units)
 Thread count was 32 (of 80 available processors)
 
 Solution count 3: 224.946 225.207 236.183 

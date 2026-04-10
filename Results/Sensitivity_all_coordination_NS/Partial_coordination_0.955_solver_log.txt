@@ -1,0 +1,53 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp1p3lz3nh.pyomo.lp
+Reading time = 0.09 seconds
+x1: 47107 rows, 33948 columns, 62367 nonzeros
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 47107 rows, 33948 columns and 62367 nonzeros (Min)
+Model fingerprint: 0xa39493dd
+Model has 1 linear objective coefficients
+Model has 19272 quadratic constraints
+Variable types: 20233 continuous, 13715 integer (13715 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 1e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [9e+00, 1e+04]
+
+Presolve removed 44586 rows and 30289 columns
+Presolve time: 0.02s
+Presolved: 7372 rows, 7137 columns, 16821 nonzeros
+Presolved model has 1794 SOS constraint(s)
+Variable types: 3720 continuous, 3417 integer (2581 binary)
+Found heuristic solution: objective 356.1739533
+Found heuristic solution: objective 355.6565955
+Performing another presolve...
+Presolve removed 7362 rows and 7126 columns
+Presolve time: 0.11s
+Found heuristic solution: objective 336.9738592
+
+Root relaxation: objective 3.368117e+02, 5 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  336.81169    0    2  336.97386  336.81169  0.05%     -    0s
+H    0     0                     336.8286008  336.81169  0.01%     -    0s
+
+Explored 1 nodes (5 simplex iterations) in 0.18 seconds (0.08 work units)
+Thread count was 32 (of 80 available processors)
+
+Solution count 4: 336.829 336.974 355.657 356.174 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.368286008187e+02, best bound 3.368116926235e+02, gap 0.0050%
+
