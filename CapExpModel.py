@@ -47,7 +47,10 @@ class capacity_expansion():
         if self.solver_type == 'gurobi' and self.capex_costing_power is None or not len(self.capex_costing_power) > 0:
             print('Using gurobi to solve the MILP')
             solver = SolverFactory('gurobi')
-            solver.solve(model, tee=True, logfile=output_path)
+            solver.options["Threads"] = self.thread_num
+            solver.options["mipgap"] = self.mingap_tag
+            print("Solving with a mipgap of: ", float(solver.options["mipgap"]) * 100, "%")
+            results_solver = solver.solve(model, tee=True, logfile=output_path)
         
         # Solve MILP with gurobi_direct
         elif self.solver_type == 'gurobi' and self.capex_costing_power is not None and len(self.capex_costing_power) > 0:
@@ -55,19 +58,25 @@ class capacity_expansion():
             self.solver_type = 'gurobi_direct'
             #solver = SolverFactory('gurobi', solver_io='nl')
             solver = SolverFactory('gurobi_direct')
+            solver.options["Threads"] = self.thread_num
+            solver.options["mipgap"] = self.mingap_tag
             solver.options['NonConvex'] = 2  # allows nonlinear/nonconvex terms
-            solver.solve(model, tee=True, logfile=output_path)
+            results_solver = solver.solve(model, tee=True, logfile=output_path)
         
         # Solve LP with ipopt
         elif self.solver_type == 'ipopt':
             solver = SolverFactory('ipopt')
-            solver.solve(model, tee=True)
+            solver.options["Threads"] = self.thread_num
+            solver.options["mipgap"] = self.mingap_tag
+            results_solver = solver.solve(model, tee=True)
         
         
         # Solve with MindtPy
         elif self.solver_type == 'mindtpy':
             solver = SolverFactory('mindtpy')
-            solver.solve(model, 
+            solver.options["Threads"] = self.thread_num
+            solver.options["mipgap"] = self.mingap_tag
+            results_solver = solver.solve(model, 
                         mip_solver = 'gurobi',
                         nlp_solver = 'ipopt',
                         tee=True)
@@ -76,6 +85,7 @@ class capacity_expansion():
             return None
 
         model = self.print_results(model)
+        self.export_computational_cost(model, results_solver, output_path)
 
         # compute unit costs for partial coordination figure if required
 
@@ -85,6 +95,175 @@ class capacity_expansion():
             model = self.compute_unit_costs_WWTP(model, solver)
         
         return model
+    
+    def export_computational_cost(self, model, results, logfile_path):
+        """
+        Exports a full computational cost summary to:
+            self.figpath_base + 'computational_cost.csv'
+
+        Includes:
+            - All variables (name, type, count, index sets)
+            - All constraints (name, count, index sets)
+            - Summary totals (binary, continuous, integer)
+            - Solver statistics parsed from Gurobi log file
+
+        Call after solver.solve() so that solver stats are populated.
+
+        Args:
+            model       : Pyomo ConcreteModel
+            results     : object returned by solver.solve()
+            logfile_path: path to the Gurobi log file (same as logfile= in solver.solve())
+        """
+        import pandas as pd
+        import os
+        import re
+        from pyomo.environ import Var, Constraint
+
+        rows = []
+
+        # ------------------------------------------------------------------ #
+        # 1. VARIABLES                                                         #
+        # ------------------------------------------------------------------ #
+        for var in model.component_objects(Var, active=True):
+            first = next(iter(var.values()), None)
+            if first is None:
+                continue
+            var_type = "Binary" if first.is_binary() else (
+                    "Integer" if first.is_integer() else "Continuous")
+            try:
+                idx = var.index_set()
+                index_name = idx.name if hasattr(idx, 'name') else str(idx)
+            except Exception:
+                index_name = "scalar"
+
+            rows.append({
+                "Section":    "Variable",
+                "Name":       var.name,
+                "Type":       var_type,
+                "Count":      len(var),
+                "Index Sets": index_name,
+                "Notes":      ""
+            })
+
+        # ------------------------------------------------------------------ #
+        # 2. CONSTRAINTS                                                       #
+        # ------------------------------------------------------------------ #
+        for con in model.component_objects(Constraint, active=True):
+            try:
+                idx = con.index_set()
+                index_name = idx.name if hasattr(idx, 'name') else str(idx)
+            except Exception:
+                index_name = "scalar"
+
+            rows.append({
+                "Section":    "Constraint",
+                "Name":       con.name,
+                "Type":       "-",
+                "Count":      len(con),
+                "Index Sets": index_name,
+                "Notes":      ""
+            })
+
+        # ------------------------------------------------------------------ #
+        # 3. TOTALS                                                            #
+        # ------------------------------------------------------------------ #
+        total_vars  = sum(len(v) for v in model.component_objects(Var, active=True))
+        total_cons  = sum(len(c) for c in model.component_objects(Constraint, active=True))
+        binary_vars = sum(1 for v in model.component_data_objects(Var, active=True) if v.is_binary())
+        cont_vars   = sum(1 for v in model.component_data_objects(Var, active=True) if v.is_continuous())
+        int_vars    = sum(1 for v in model.component_data_objects(Var, active=True) if v.is_integer() and not v.is_binary())
+
+        for label, value in [
+            ("TOTAL Variables",             total_vars),
+            ("  - Binary",                  binary_vars),
+            ("  - Continuous",              cont_vars),
+            ("  - Integer (non-binary)",    int_vars),
+            ("TOTAL Constraints",           total_cons),
+        ]:
+            rows.append({
+                "Section":    "Summary",
+                "Name":       label,
+                "Type":       "-",
+                "Count":      value,
+                "Index Sets": "-",
+                "Notes":      ""
+            })
+
+        # ------------------------------------------------------------------ #
+        # 4. SOLVER STATISTICS (parsed from Gurobi log)                       #
+        # ------------------------------------------------------------------ #
+        solver_stats = {
+            "Solve Time (s)":        "N/A",
+            "Work Units":            "N/A", 
+            "MIP Gap (%)":           "N/A",
+            "B&B Nodes Explored":    "N/A",
+            "Solver Status":         "N/A",
+            "Termination Condition": "N/A",
+        }
+
+        try:
+            with open(logfile_path, 'r') as f:
+                log = f.read()
+
+            # Solve time AND work units — both on the same line in Gurobi log:
+            time_work_match = re.search(r'in\s+([\d.]+)\s+seconds\s+\(([\d.]+)\s+work units\)', log)
+            if time_work_match:
+                solver_stats["Solve Time (s)"] = float(time_work_match.group(1))
+                solver_stats["Work Units"]     = float(time_work_match.group(2))
+
+            # MIP gap
+            gap_match = re.search(r'gap\s+([\d.]+)%', log)
+            if gap_match:
+                solver_stats["MIP Gap (%)"] = float(gap_match.group(1))
+
+            # B&B nodes
+            node_match = re.search(r'Explored\s+([\d]+)\s+nodes', log)
+            if node_match:
+                solver_stats["B&B Nodes Explored"] = int(node_match.group(1))
+
+            # Termination condition from log content
+            if "Optimal solution found" in log:
+                solver_stats["Termination Condition"] = "optimal"
+                solver_stats["Solver Status"]         = "ok"
+            elif "Time limit reached" in log:
+                solver_stats["Termination Condition"] = "maxTimeLimit"
+                solver_stats["Solver Status"]         = "aborted"
+            elif "Infeasible" in log:
+                solver_stats["Termination Condition"] = "infeasible"
+                solver_stats["Solver Status"]         = "warning"
+
+        except FileNotFoundError:
+            print(f"[warning] Gurobi log file not found at: {logfile_path}")
+
+        # Overlay Pyomo-level status — overwrites log-parsed values if available,
+        # as Pyomo's interpretation is more reliable for status/termination
+        try:
+            solver_stats["Solver Status"]          = str(results.solver.status)
+            solver_stats["Termination Condition"]  = str(results.solver.termination_condition)
+        except Exception:
+            pass
+
+        for stat_name, stat_val in solver_stats.items():
+            rows.append({
+                "Section":    "Solver",
+                "Name":       stat_name,
+                "Type":       "-",
+                "Count":      stat_val,
+                "Index Sets": "-",
+                "Notes":      ""
+            })
+
+        # ------------------------------------------------------------------ #
+        # 5. WRITE CSV                                                         #
+        # ------------------------------------------------------------------ #
+        computational_cost_path = self.figpath_base + 'computational_cost.csv'
+        os.makedirs(os.path.dirname(computational_cost_path), exist_ok=True)
+
+        df = pd.DataFrame(rows, columns=["Section", "Name", "Type", "Count", "Index Sets", "Notes"])
+        df.to_csv(computational_cost_path, index=False)
+
+        print(f"[computational cost] Summary written to: {computational_cost_path}")
+        return df
     
     def print_results(self, model):
         print('Policy Scenario:', self.Constraint_tag)
@@ -551,7 +730,7 @@ class capacity_expansion():
             print(f'Trading ratio (excess treatment to meet compliance): {TR:.1f}:1 Ratio')
         except:
             TR = 1
-            print(f'params["TR"] is not defined --> Assuming 1:1 Trading Ratio since')
+            print(f'params["TR"] is not defined --> Assuming 1:1 Trading Ratio')
 
         def add_trading_ratio(model, t):
             if t <= self.ind_end_trading_market_year:
