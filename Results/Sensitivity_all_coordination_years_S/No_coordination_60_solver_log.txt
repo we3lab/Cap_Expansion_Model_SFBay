@@ -1,0 +1,90 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmpgf921vhj.pyomo.lp
+Reading time = 0.41 seconds
+x1: 89733 rows, 92204 columns, 658455 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 89733 rows, 92204 columns and 658455 nonzeros (Min)
+Model fingerprint: 0xc614bb59
+Model has 1 linear objective coefficients
+Model has 40716 quadratic constraints
+Variable types: 40397 continuous, 51807 integer (51807 binary)
+Coefficient statistics:
+  Matrix range     [3e-01, 3e+03]
+  QMatrix range    [2e-05, 4e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 9e+03]
+  QRHS range       [5e+00, 1e+04]
+
+Presolve removed 44070 rows and 61521 columns
+Presolve time: 0.92s
+Presolved: 68363 rows, 49370 columns, 558400 nonzeros
+Presolved model has 10480 SOS constraint(s)
+Variable types: 20824 continuous, 28546 integer (28426 binary)
+Found heuristic solution: objective 758.7895293
+Found heuristic solution: objective 577.5385376
+Performing another presolve...
+Presolve removed 53486 rows and 31527 columns (presolve time = 5s)...
+Presolve removed 80422 rows and 49459 columns (presolve time = 17s)...
+Presolve removed 55432 rows and 39584 columns
+Presolve time: 17.31s
+Found heuristic solution: objective 457.9488882
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.2495160e+02   1.416536e+03   0.000000e+00     20s
+    1592    3.2621535e+02   0.000000e+00   0.000000e+00     20s
+
+Root relaxation: objective 3.262154e+02, 1592 iterations, 0.04 seconds (0.11 work units)
+Total elapsed time = 19.57s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  326.21535    0  366  457.94889  326.21535  28.8%     -   19s
+     0     0  406.96851    0  300  457.94889  406.96851  11.1%     -   19s
+     0     0  407.01620    0  262  457.94889  407.01620  11.1%     -   19s
+     0     0  407.01620    0  262  457.94889  407.01620  11.1%     -   19s
+     0     0  408.56032    0  290  457.94889  408.56032  10.8%     -   19s
+     0     0  408.56553    0  280  457.94889  408.56553  10.8%     -   19s
+     0     0  408.56553    0  280  457.94889  408.56553  10.8%     -   19s
+     0     0  408.56553    0  280  457.94889  408.56553  10.8%     -   19s
+     0     0  408.56553    0  280  457.94889  408.56553  10.8%     -   19s
+     0     0  408.60906    0  290  457.94889  408.60906  10.8%     -   19s
+     0     0  408.61454    0  254  457.94889  408.61454  10.8%     -   19s
+H    0     0                     457.8990068  408.61454  10.8%     -   19s
+H    0     0                     456.7560148  408.61454  10.5%     -   19s
+H    0     0                     435.3734064  408.61454  6.15%     -   20s
+H    0     0                     410.5075671  408.61454  0.46%     -   20s
+H    0     0                     410.5012786  408.61454  0.46%     -   20s
+H    0     0                     410.5003256  408.61454  0.46%     -   20s
+H    0     0                     410.4994029  408.61454  0.46%     -   20s
+H    0     0                     410.4985087  408.61454  0.46%     -   20s
+H    0     0                     410.4981491  410.46396  0.01%     -   20s
+     0     0          -    0       410.49815  410.49619  0.00%     -   20s
+
+Cutting planes:
+  Gomory: 1
+
+Explored 1 nodes (1860 simplex iterations) in 20.11 seconds (21.93 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 8: 410.498 410.499 435.373 ... 758.79
+
+Optimal solution found (tolerance 1.00e-05)
+Best objective 4.104981491023e+02, best bound 4.104961893370e+02, gap 0.0005%
+

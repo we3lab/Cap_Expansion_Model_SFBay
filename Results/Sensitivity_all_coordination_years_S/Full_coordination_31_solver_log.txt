@@ -1,0 +1,122 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmpciodedf9.pyomo.lp
+Reading time = 0.20 seconds
+x1: 45315 rows, 47693 columns, 331026 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 45315 rows, 47693 columns and 331026 nonzeros (Min)
+Model fingerprint: 0xc0fd13a6
+Model has 1 linear objective coefficients
+Model has 23264 quadratic constraints
+Variable types: 20909 continuous, 26784 integer (26784 binary)
+Coefficient statistics:
+  Matrix range     [5e-01, 3e+03]
+  QMatrix range    [2e-05, 2e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [6e+00, 1e+04]
+
+Presolve removed 25007 rows and 31918 columns
+Presolve time: 0.68s
+Presolved: 32965 rows, 26296 columns, 237220 nonzeros
+Presolved model has 6040 SOS constraint(s)
+Variable types: 12022 continuous, 14274 integer (14274 binary)
+Found heuristic solution: objective 799.2775688
+Found heuristic solution: objective 629.2785113
+Performing another presolve...
+Presolve removed 13157 rows and 11749 columns
+Presolve time: 2.02s
+Found heuristic solution: objective 628.9687073
+Deterministic concurrent LP optimizer: primal and dual simplex
+Showing primal log only...
+
+Concurrent spin time: 0.00s
+
+Solved with dual simplex
+
+Root relaxation: objective 5.039473e+01, 7990 iterations, 0.53 seconds (0.71 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   50.39473    0 1314  628.96871   50.39473  92.0%     -    3s
+H    0     0                     606.3812122   50.39473  91.7%     -    3s
+H    0     0                     577.0299349   50.39473  91.3%     -    3s
+H    0     0                     569.7950752   50.39473  91.2%     -    3s
+     0     0   80.96758    0 1013  569.79508   80.96758  85.8%     -    5s
+     0     0   81.11853    0 1039  569.79508   81.11853  85.8%     -    6s
+H    0     0                     454.3493237   81.11853  82.1%     -    6s
+     0     0  114.76625    0 2152  454.34932  114.76625  74.7%     -    8s
+H    0     0                     374.5523765  115.92077  69.1%     -    8s
+     0     0  115.92077    0 2599  374.55238  115.92077  69.1%     -    8s
+H    0     0                     369.4796748  115.95587  68.6%     -    8s
+H    0     0                     369.0505624  115.95587  68.6%     -    8s
+     0     0  115.95587    0 2264  369.05056  115.95587  68.6%     -    9s
+H    0     0                     368.6863731  115.95587  68.5%     -    9s
+H    0     0                     368.6162492  115.95587  68.5%     -    9s
+     0     0  132.98545    0 3303  368.61625  132.98545  63.9%     -   10s
+H    0     0                     368.3341235  132.99435  63.9%     -   10s
+     0     0  133.26025    0 3334  368.33412  133.26025  63.8%     -   11s
+     0     0  155.56643    0 3514  368.33412  155.56643  57.8%     -   13s
+     0     0  156.41542    0 3558  368.33412  156.41542  57.5%     -   14s
+     0     0  156.41542    0 3558  368.33412  156.41542  57.5%     -   14s
+     0     0  161.69751    0 3199  368.33412  161.69751  56.1%     -   15s
+     0     0  161.69751    0 3199  368.33412  161.69751  56.1%     -   15s
+     0     0  161.95326    0 3211  368.33412  161.95326  56.0%     -   16s
+     0     0  164.17302    0 3332  368.33412  164.17302  55.4%     -   16s
+     0     0  164.39795    0 3412  368.33412  164.39795  55.4%     -   17s
+     0     0  164.60253    0 3199  368.33412  164.60253  55.3%     -   18s
+     0     0  164.73681    0 3199  368.33412  164.73681  55.3%     -   19s
+     0     0  164.73681    0 3199  368.33412  164.73681  55.3%     -   19s
+     0     0  164.73681    0 3153  368.33412  164.73681  55.3%     -   19s
+H    0     0                     365.3209777  164.73681  54.9%     -   19s
+H    0     0                     364.9748284  164.73681  54.9%     -   19s
+H    0     0                     364.9280084  164.73681  54.9%     -   19s
+     0     2  164.74442    0 3148  364.92801  164.74442  54.9%     -   20s
+H   11    16                     353.6566067  174.09225  50.8%  1301   22s
+   157   115  177.15211    5  912  353.65661  177.15211  49.9%   446   25s
+H  252   186                     314.6997264  179.13637  43.1%   307   25s
+H  304   192                     314.6997052  181.15028  42.4%   274   26s
+H  306   192                     313.3839677  181.15028  42.2%   275   26s
+H  308   192                     306.1621901  181.15028  40.8%   275   26s
+H  385   179                     305.6112214  195.13493  36.1%   270   28s
+H  465   220                     295.4314028  222.67075  24.6%   270   29s
+H  472   220                     295.0440602  222.67075  24.5%   273   29s
+H  473   220                     295.0390821  222.67075  24.5%   272   29s
+   548   206  274.32036   12  395  295.03908  263.79088  10.6%   268   30s
+H  596   203                     292.5385094  266.60741  8.86%   260   30s
+
+Cutting planes:
+  Cover: 358
+  Implied bound: 727
+  Clique: 269
+  MIR: 962
+  Flow cover: 535
+  Inf proof: 5
+  Zero half: 64
+  RLT: 148
+  Relax-and-lift: 83
+  BQP: 28
+  PSD: 4
+
+Explored 3829 nodes (225670 simplex iterations) in 34.42 seconds (45.94 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 10: 292.539 295.039 295.044 ... 353.657
+
+Optimal solution found (tolerance 1.00e-05)
+Best objective 2.925385094218e+02, best bound 2.925385094218e+02, gap 0.0000%
+

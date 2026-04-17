@@ -1,0 +1,59 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp9ffds40p.pyomo.lp
+Reading time = 0.13 seconds
+x1: 58033 rows, 41843 columns, 76545 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 58033 rows, 41843 columns and 76545 nonzeros (Min)
+Model fingerprint: 0x25447a90
+Model has 1 linear objective coefficients
+Model has 23787 quadratic constraints
+Variable types: 24936 continuous, 16907 integer (16907 binary)
+Coefficient statistics:
+  Matrix range     [5e-01, 3e+03]
+  QMatrix range    [2e-05, 5e+02]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 1e+04]
+  QRHS range       [2e-01, 1e+04]
+
+Presolve removed 54684 rows and 36735 columns
+Presolve time: 0.04s
+Presolved: 10492 rows, 10641 columns, 24233 nonzeros
+Presolved model has 3174 SOS constraint(s)
+Variable types: 5642 continuous, 4999 integer (3946 binary)
+Found heuristic solution: objective 569.2138257
+Found heuristic solution: objective 558.7120212
+Performing another presolve...
+Presolve removed 10480 rows and 10626 columns
+Presolve time: 0.18s
+Found heuristic solution: objective 554.9563334
+
+Root relaxation: objective 5.547190e+02, 7 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  554.71904    0    3  554.95633  554.71904  0.04%     -    0s
+H    0     0                     554.7217450  554.71904  0.00%     -    0s
+
+Explored 1 nodes (7 simplex iterations) in 0.27 seconds (0.14 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 4: 554.722 554.956 558.712 569.214 
+
+Optimal solution found (tolerance 1.00e-05)
+Best objective 5.547217450285e+02, best bound 5.547190407526e+02, gap 0.0005%
+
