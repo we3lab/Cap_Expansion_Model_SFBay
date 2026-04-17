@@ -21,11 +21,11 @@ projection_multipliers = np.arange(1.0, 3.1, 0.5)
 for staged_scenario in ["Non_Staged", "Staged"]:
     if staged_scenario == "Non_Staged":
         params["staged_infrastructure"]= False
-        params["version_num"] = 'Sensitivity_all_coordination_NS_TR'
+        params["version_num"] = 'Sensitivity_all_coordination_TR_NS'
     
     elif staged_scenario == "Staged":
         params["staged_infrastructure"]= True
-        params["version_num"] = 'Sensitivity_all_coordination_S_TR'
+        params["version_num"] = 'Sensitivity_all_coordination_TR_S'
     
     for i, mult in enumerate(projection_multipliers):
         mult = round(mult, 2)
