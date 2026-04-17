@@ -1,0 +1,54 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp2dv9bvfb.pyomo.lp
+Reading time = 0.13 seconds
+x1: 63097 rows, 45020 columns, 83213 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 0.01
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  0.01
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 63097 rows, 45020 columns and 83213 nonzeros (Min)
+Model fingerprint: 0xd8d2b701
+Model has 1 linear objective coefficients
+Model has 25398 quadratic constraints
+Variable types: 26976 continuous, 18044 integer (18044 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 3e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 2e+04]
+  QRHS range       [7e+00, 1e+04]
+
+Presolve removed 60353 rows and 40464 columns
+Presolve time: 0.03s
+Presolved: 9261 rows, 9625 columns, 21972 nonzeros
+Presolved model has 2990 SOS constraint(s)
+Variable types: 5302 continuous, 4323 integer (3574 binary)
+Found heuristic solution: objective 662.0967456
+Found heuristic solution: objective 659.0425589
+Found heuristic solution: objective 658.2268459
+Performing another presolve...
+Presolve removed 9247 rows and 9612 columns
+Presolve time: 0.15s
+Found heuristic solution: objective 649.9295573
+
+Root relaxation: cutoff, 0 iterations, 0.00 seconds (0.00 work units)
+
+Explored 1 nodes (0 simplex iterations) in 0.24 seconds (0.12 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 4: 649.93 658.227 659.043 662.097 
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 6.499295573152e+02, best bound 6.499295573152e+02, gap 0.0000%
+
