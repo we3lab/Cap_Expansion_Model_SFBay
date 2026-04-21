@@ -11,6 +11,10 @@ params = json.load(open(fp))
 
 # Initialize parameters
 params["version_num"] = 'Staged'
+params["capex_costing_method"] = "flow"
+if params["capex_costing_method"] == "flow":
+    params["version_num"] = params["version_num"] + "_flow_costing"
+
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
@@ -21,7 +25,6 @@ params["staged_infrastructure"]= True
 params["trading_market_year"] = 0
 params["unfix_infrastructure_year"] = 0  
 params["marginal_cost_analysis"] = False
-
 
 
 # Case 2: Staged, not coordinated

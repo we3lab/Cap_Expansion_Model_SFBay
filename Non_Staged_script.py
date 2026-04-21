@@ -12,6 +12,10 @@ params = json.load(open(fp))
 
 # Initialize parameters
 params["version_num"] = 'Non_Staged'
+params["capex_costing_method"] = "load"
+if params["capex_costing_method"] == "flow":
+    params["version_num"] = params["version_num"] + "_flow_costing"
+
 params["seasonal_regulation"] = True
 params["sensitivity_analysis"] = False
 params["update_figures"] = False
