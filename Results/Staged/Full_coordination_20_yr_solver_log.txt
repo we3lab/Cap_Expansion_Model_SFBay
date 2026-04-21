@@ -1,16 +1,22 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmpjh2wq0j2.pyomo.lp
-Reading time = 0.13 seconds
-x1: 46930 rows, 38197 columns, 138743 nonzeros
+Read LP format model from file /tmp/tmp9tjjilrf.pyomo.lp
+Reading time = 0.12 seconds
+x1: 46933 rows, 38197 columns, 139124 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
 CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
-Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 46930 rows, 38197 columns and 138743 nonzeros (Min)
-Model fingerprint: 0xbc334a6f
+Optimize a model with 46933 rows, 38197 columns and 139124 nonzeros (Min)
+Model fingerprint: 0x553a66da
 Model has 1 linear objective coefficients
 Model has 18736 quadratic constraints
 Variable types: 20233 continuous, 17964 integer (17964 binary)
@@ -23,32 +29,31 @@ Coefficient statistics:
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
 
-Presolve removed 42534 rows and 33606 columns
+Presolve removed 42092 rows and 33596 columns
 Presolve time: 0.04s
-Presolved: 8648 rows, 7976 columns, 31974 nonzeros
-Presolved model has 1762 SOS constraint(s)
-Variable types: 3374 continuous, 4602 integer (3618 binary)
-Found heuristic solution: objective 585.3662544
-Found heuristic solution: objective 492.4978008
+Presolved: 9106 rows, 7999 columns, 32963 nonzeros
+Presolved model has 1770 SOS constraint(s)
+Variable types: 3386 continuous, 4613 integer (3627 binary)
+Found heuristic solution: objective 585.2792554
+Found heuristic solution: objective 476.6583962
+Found heuristic solution: objective 476.3512298
 Performing another presolve...
-Presolve removed 8409 rows and 7692 columns
-Presolve time: 0.13s
-Found heuristic solution: objective 488.3965335
-Found heuristic solution: objective 485.0087569
+Presolve removed 9056 rows and 7938 columns
+Presolve time: 0.07s
+Found heuristic solution: objective 475.0671483
 
-Root relaxation: objective 4.750629e+02, 178 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: interrupted, 11 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-H    0     0                     475.0628937  475.06289  0.00%     -    0s
-     0     0  475.06289    0   41  475.06289  475.06289  0.00%     -    0s
+     0     0          -    0       475.06715  475.06289  0.00%     -    0s
 
-Explored 1 nodes (178 simplex iterations) in 0.22 seconds (0.14 work units)
-Thread count was 32 (of 80 available processors)
+Explored 1 nodes (11 simplex iterations) in 0.17 seconds (0.11 work units)
+Thread count was 8 (of 80 available processors)
 
-Solution count 5: 475.063 485.009 488.397 ... 585.366
+Solution count 5: 475.067 475.07 476.351 ... 585.279
 
-Optimal solution found (tolerance 1.00e-04)
-Best objective 4.750628936646e+02, best bound 4.750628936646e+02, gap 0.0000%
+Optimal solution found (tolerance 1.00e-05)
+Best objective 4.750671482597e+02, best bound 4.750628936646e+02, gap 0.0009%
 

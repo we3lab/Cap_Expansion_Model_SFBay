@@ -1,16 +1,22 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmp22fxiffp.pyomo.lp
+Read LP format model from file /tmp/tmp0p_0i2vt.pyomo.lp
 Reading time = 0.10 seconds
-x1: 47098 rows, 33946 columns, 61288 nonzeros
+x1: 47101 rows, 33946 columns, 61294 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
 CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
-Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 47098 rows, 33946 columns and 61288 nonzeros (Min)
-Model fingerprint: 0xfa3ed506
+Optimize a model with 47101 rows, 33946 columns and 61294 nonzeros (Min)
+Model fingerprint: 0x7060c25e
 Model has 1 linear objective coefficients
 Model has 19276 quadratic constraints
 Variable types: 20232 continuous, 13714 integer (13714 binary)
@@ -23,25 +29,25 @@ Coefficient statistics:
   RHS range        [1e+00, 1e+04]
   QRHS range       [7e+00, 1e+04]
 
-Presolve removed 44822 rows and 30482 columns
+Presolve removed 44568 rows and 30472 columns
 Presolve time: 0.03s
-Presolved: 7109 rows, 7120 columns, 16396 nonzeros
-Presolved model has 2072 SOS constraint(s)
-Variable types: 3805 continuous, 3315 integer (2620 binary)
+Presolved: 7379 rows, 7143 columns, 16945 nonzeros
+Presolved model has 2080 SOS constraint(s)
+Variable types: 3817 continuous, 3326 integer (2629 binary)
 Found heuristic solution: objective 479.1566502
-Found heuristic solution: objective 476.0803062
+Found heuristic solution: objective 476.0683421
 Performing another presolve...
-Presolve removed 7098 rows and 7110 columns
-Presolve time: 0.11s
+Presolve removed 7368 rows and 7133 columns
+Presolve time: 0.10s
 Found heuristic solution: objective 469.3597380
 
 Root relaxation: cutoff, 0 iterations, 0.00 seconds (0.00 work units)
 
 Explored 1 nodes (0 simplex iterations) in 0.17 seconds (0.08 work units)
-Thread count was 32 (of 80 available processors)
+Thread count was 8 (of 80 available processors)
 
-Solution count 4: 469.36 469.36 476.08 479.157 
+Solution count 4: 469.36 469.36 476.068 479.157 
 
-Optimal solution found (tolerance 1.00e-04)
+Optimal solution found (tolerance 1.00e-05)
 Best objective 4.693597380218e+02, best bound 4.693597380218e+02, gap 0.0000%
 
