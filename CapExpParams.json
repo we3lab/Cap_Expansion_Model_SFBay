@@ -31,7 +31,7 @@
     "new_reg_year" :"2034-10-01",
     "timestep_freq":"MS",
     "time_to_build_yr": 5,
-    "WWTP_data_path"  :  "Input_Data/Lower_South_Bay_input_21Apr26.csv",
+    "WWTP_data_path"  :  "Input_Data/Lower_South_Bay_input.csv",
     "discharge_NPDES_current_tag": "Average_TIN_Dry_NPDES_current",
     "discharge_ECHO_current_tag": "Average_TIN_Dry_ECHO_current",
     "discharge_BACWA_projected_tag": "Average_TIN_Dry_BACWA_projected",
