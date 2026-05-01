@@ -1,0 +1,53 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmpt1xj9ksa.pyomo.lp
+Reading time = 0.18 seconds
+x1: 78636 rows, 56457 columns, 106948 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 0.01
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  0.01
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 78636 rows, 56457 columns and 106948 nonzeros (Min)
+Model fingerprint: 0xeaa92751
+Model has 1 linear objective coefficients
+Model has 31980 quadratic constraints
+Variable types: 33719 continuous, 22738 integer (22738 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 3e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 3e+04]
+  QRHS range       [7e+00, 1e+04]
+
+Presolve removed 74798 rows and 49625 columns
+Presolve time: 0.07s
+Presolved: 14053 rows, 14944 columns, 33443 nonzeros
+Presolved model has 4946 SOS constraint(s)
+Variable types: 8318 continuous, 6626 integer (5639 binary)
+Found heuristic solution: objective 913.2649994
+Found heuristic solution: objective 906.7974640
+Performing another presolve...
+Presolve removed 14029 rows and 14914 columns
+Presolve time: 0.27s
+Found heuristic solution: objective 875.2135156
+
+Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
+
+Explored 1 nodes (0 simplex iterations) in 0.42 seconds (0.21 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 4: 875.214 875.214 906.797 913.265 
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 8.752135156078e+02, best bound 8.746468168301e+02, gap 0.0647%
+

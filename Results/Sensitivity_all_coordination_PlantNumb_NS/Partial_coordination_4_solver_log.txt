@@ -1,0 +1,53 @@
+Solver command line: []
+
+Read LP format model from file /tmp/tmp1hpa9bvk.pyomo.lp
+Reading time = 0.14 seconds
+x1: 63097 rows, 45022 columns, 84161 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 0.01
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
+
+CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  0.01
+Threads  8
+
+Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
+Optimize a model with 63097 rows, 45022 columns and 84161 nonzeros (Min)
+Model fingerprint: 0xc7228b89
+Model has 1 linear objective coefficients
+Model has 25398 quadratic constraints
+Variable types: 26976 continuous, 18046 integer (18046 binary)
+Coefficient statistics:
+  Matrix range     [6e-01, 3e+03]
+  QMatrix range    [2e-05, 3e+01]
+  QLMatrix range   [2e-02, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [2e-01, 1e+04]
+  RHS range        [1e+00, 2e+04]
+  QRHS range       [7e+00, 1e+04]
+
+Presolve removed 59860 rows and 39780 columns
+Presolve time: 0.04s
+Presolved: 10672 rows, 11132 columns, 25247 nonzeros
+Presolved model has 3468 SOS constraint(s)
+Variable types: 5991 continuous, 5141 integer (4156 binary)
+Found heuristic solution: objective 753.4317929
+Found heuristic solution: objective 744.2739677
+Performing another presolve...
+Presolve removed 10653 rows and 11109 columns
+Presolve time: 0.20s
+Found heuristic solution: objective 734.1550869
+
+Root relaxation: interrupted, 0 iterations, 0.00 seconds (0.00 work units)
+
+Explored 1 nodes (0 simplex iterations) in 0.31 seconds (0.15 work units)
+Thread count was 8 (of 80 available processors)
+
+Solution count 4: 734.155 734.163 744.274 753.432 
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective 7.341550868758e+02, best bound 7.336401161829e+02, gap 0.0701%
+
