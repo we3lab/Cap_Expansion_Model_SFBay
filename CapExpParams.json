@@ -1,5 +1,5 @@
 {
-    "staged_infrastructure": true,
+    "staged_infrastructure": false,
     "trading_market": false,
     "trading_market_year": 0,
     "joint_infrastructure": false,
@@ -11,7 +11,7 @@
     "capex_costing_power": [],
     "unit_cost_analysis": false,
     "unit_cost_dt": "2054-06-01",
-    "version_num": "Capex_flow_costing",
+    "version_num": "Test_no_L2Xmax",
     "Objective_tag": "",
     "solver_type": "gurobi",
     "thread_num": 8,
