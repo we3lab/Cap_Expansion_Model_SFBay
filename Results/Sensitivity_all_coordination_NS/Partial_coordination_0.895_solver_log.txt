@@ -1,16 +1,22 @@
 Solver command line: []
 
-Read LP format model from file /tmp/tmp4980rdfv.pyomo.lp
-Reading time = 0.10 seconds
-x1: 47127 rows, 33948 columns, 62387 nonzeros
+Read LP format model from file /tmp/tmpaqp478ye.pyomo.lp
+Reading time = 0.14 seconds
+x1: 47130 rows, 33948 columns, 62393 nonzeros
+Set parameter Threads to value 8
+Set parameter MIPGap to value 1e-05
 Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Ubuntu 20.04.2 LTS (fossa-ditto X84)")
 
 CPU model: Intel(R) Xeon(R) Gold 6242R CPU @ 3.10GHz, instruction set [SSE2|AVX|AVX2|AVX512]
-Thread count: 40 physical cores, 80 logical processors, using up to 32 threads
+Thread count: 40 physical cores, 80 logical processors, using up to 8 threads
+
+Non-default parameters:
+MIPGap  1e-05
+Threads  8
 
 Academic license 2548088 - for non-commercial use only - registered to si___@stanford.edu
-Optimize a model with 47127 rows, 33948 columns and 62387 nonzeros (Min)
-Model fingerprint: 0xef41f096
+Optimize a model with 47130 rows, 33948 columns and 62393 nonzeros (Min)
+Model fingerprint: 0x21affd67
 Model has 1 linear objective coefficients
 Model has 19262 quadratic constraints
 Variable types: 20233 continuous, 13715 integer (13715 binary)
@@ -23,31 +29,29 @@ Coefficient statistics:
   RHS range        [1e+00, 1e+04]
   QRHS range       [6e+00, 1e+04]
 
-Presolve removed 44772 rows and 30412 columns
+Presolve removed 44445 rows and 30412 columns
 Presolve time: 0.03s
-Presolved: 7129 rows, 6950 columns, 16233 nonzeros
+Presolved: 7459 rows, 6950 columns, 16893 nonzeros
 Presolved model has 1786 SOS constraint(s)
 Variable types: 3454 continuous, 3496 integer (2521 binary)
-Found heuristic solution: objective 351.4251680
 Found heuristic solution: objective 350.4946230
 Performing another presolve...
-Presolve removed 7119 rows and 6939 columns
-Presolve time: 0.12s
-Found heuristic solution: objective 329.2073535
+Presolve removed 7449 rows and 6939 columns
+Presolve time: 0.11s
+Found heuristic solution: objective 329.2077137
 
-Root relaxation: objective 3.290754e+02, 7 iterations, 0.00 seconds (0.00 work units)
+Root relaxation: objective 3.290779e+02, 5 iterations, 0.00 seconds (0.00 work units)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0  329.07542    0    1  329.20735  329.07542  0.04%     -    0s
-H    0     0                     329.0863349  329.07542  0.00%     -    0s
+*    0     0               0     329.0779162  329.07792  0.00%     -    0s
 
-Explored 1 nodes (7 simplex iterations) in 0.18 seconds (0.08 work units)
-Thread count was 32 (of 80 available processors)
+Explored 1 nodes (5 simplex iterations) in 0.16 seconds (0.08 work units)
+Thread count was 8 (of 80 available processors)
 
-Solution count 4: 329.086 329.207 350.495 351.425 
+Solution count 3: 329.078 329.208 350.495 
 
-Optimal solution found (tolerance 1.00e-04)
-Best objective 3.290863348508e+02, best bound 3.290754214381e+02, gap 0.0033%
+Optimal solution found (tolerance 1.00e-05)
+Best objective 3.290779162063e+02, best bound 3.290779162063e+02, gap 0.0000%
 
