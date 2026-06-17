@@ -45,7 +45,7 @@ params["update_figures"] = False
 params["unit_cost_analysis"] = False
 
 min_plants = 3
-max_plants = 10
+max_plants = 9
 plant_projections = np.arange(min_plants, max_plants + 1, 1) 
 input_file = params["WWTP_data_path"]
 
